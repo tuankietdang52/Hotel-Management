@@ -1,7 +1,6 @@
-package View;
+package GUI;
 
 import javax.swing.*;
-import java.sql.DriverManager;
 
 public class MainView {
     private JPanel MainPanel;

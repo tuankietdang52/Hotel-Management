@@ -8,6 +8,7 @@ import java.util.Properties;
 public class SqlConnect {
     private final static String username = "shiba";
     private final static String password = "bruh";
+    int a = 2;
 
     public static Connection getConnection() throws SQLException, ClassNotFoundException{
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
