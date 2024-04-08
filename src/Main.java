@@ -38,5 +38,6 @@ public class Main {
         catch (Exception ex){
             System.out.println("NULL");
         }
+        System.out.print("helo");
     }
 }
