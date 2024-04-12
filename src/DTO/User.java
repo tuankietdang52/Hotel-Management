@@ -1,19 +1,20 @@
 package DTO;
 import Enum.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class User {
+    private String code;
     private String firstName;
     private String lastName;
-    private String code;
     private String username;
     private String password;
     private int phone;
     private String address;
     private EPermission permission;
     private EGender gender;
-    private LocalDateTime birthday;
+    private LocalDate birthday;
 
     public User(){
 
@@ -26,7 +27,7 @@ public class User {
                 int phone,
                 String address,
                 EGender gender,
-                LocalDateTime birthday){
+                LocalDate birthday){
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
@@ -77,7 +78,7 @@ public class User {
         return gender;
     }
 
-    public LocalDateTime getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
@@ -117,7 +118,7 @@ public class User {
         this.username = username;
     }
 
-    public void setBirthday(LocalDateTime birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 }
