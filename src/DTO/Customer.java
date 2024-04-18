@@ -1,8 +1,6 @@
 package DTO;
 import Enum.*;
 
-import java.time.LocalDateTime;
-
 public class Customer extends User {
     public Customer(){
 
@@ -15,7 +13,7 @@ public class Customer extends User {
                     int phone,
                     String address,
                     EGender gender,
-                    LocalDateTime birthday){
+                    java.sql.Date birthday){
 
         super(firstName, lastName, username, password, phone, address, gender, birthday);
         setPermission(EPermission.CUSTOMER);

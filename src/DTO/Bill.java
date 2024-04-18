@@ -74,12 +74,12 @@ public class Bill implements IList<BillDetail> {
 
     public void add(BillDetail detail){
         this.billDetails.add(detail);
-        calculateTotal();
+        this.total += detail.getTotal();
     }
 
     public void remove(BillDetail detail){
         this.billDetails.remove(detail);
-        calculateTotal();
+        this.total -= detail.getTotal();
     }
 
     public void calculateTotal(){
