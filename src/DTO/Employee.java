@@ -1,9 +1,6 @@
 package DTO;
 import Enum.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 public class Employee extends User {
     private double salary;
 
@@ -14,7 +11,7 @@ public class Employee extends User {
                     int phone,
                     String address,
                     EGender gender,
-                    LocalDate birthday,
+                    java.sql.Date birthday,
                     double salary) {
 
         super(firstName, lastName, username, password, phone, address, gender, birthday);

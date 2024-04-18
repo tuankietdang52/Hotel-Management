@@ -1,8 +1,7 @@
 package DTO;
 import Enum.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 public class User {
     private String code;
@@ -14,7 +13,7 @@ public class User {
     private String address;
     private EPermission permission;
     private EGender gender;
-    private LocalDate birthday;
+    private java.sql.Date birthday;
 
     public User(){
 
@@ -27,7 +26,7 @@ public class User {
                 int phone,
                 String address,
                 EGender gender,
-                LocalDate birthday){
+                java.sql.Date birthday){
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
@@ -78,7 +77,7 @@ public class User {
         return gender;
     }
 
-    public LocalDate getBirthday() {
+    public java.sql.Date getBirthday() {
         return birthday;
     }
 
@@ -118,7 +117,7 @@ public class User {
         this.username = username;
     }
 
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(java.sql.Date birthday) {
         this.birthday = birthday;
     }
 }
