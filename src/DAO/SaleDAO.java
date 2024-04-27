@@ -3,6 +3,7 @@ package DAO;
 import DTO.Sale;
 import DTO.SaleDetail;
 import SQL.SqlConnect;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,14 +29,14 @@ public class SaleDAO extends BaseDAO {
         String query = "SELECT * FROM CHITIET_KM";
 
         Connection con = null;
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         ResultSet rs = null;
 
         try {
             con = SqlConnect.getConnection();
-            stmt = con.prepareStatement(query);
+            stmt = con.createStatement();
 
-            rs = stmt.executeQuery();
+            rs = stmt.executeQuery(query);
             while (rs.next()){
                 String code = rs.getString("MACTKM");
                 String name = rs.getString("TEN");
@@ -43,7 +44,10 @@ public class SaleDAO extends BaseDAO {
                 java.sql.Date dateEnd = rs.getDate("NGAYKETTHUC");
                 String imagePath = rs.getString("HINH");
 
-                saleModels.add(new Sale(code, name, dateStart, dateEnd, imagePath));
+                Sale model = new Sale(code, name, dateStart, dateEnd, imagePath);
+                model.setSaleDetails(getSaleDetails(code, stmt));
+
+                saleModels.add(model);
             }
         }
         catch (ClassNotFoundException | SQLException ex){
@@ -54,29 +58,21 @@ public class SaleDAO extends BaseDAO {
         }
     }
 
-    public ArrayList<SaleDetail> getSaleDetails(String saleCode){
+    private @NotNull ArrayList<SaleDetail> getSaleDetails(String saleCode, @NotNull Statement stmt) throws SQLException{
         String query = """
-                        SELECT MACTKM, MASANPHAM, PHANTRAMKM
+                        SELECT *
                          FROM CHITIET_KMSP
                           WHERE MACTKM =""" + saleCode;
 
         ArrayList<SaleDetail> saleDetails = new ArrayList<>();
+        ResultSet rs = stmt.executeQuery(query);
 
-        try {
-            var con = SqlConnect.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
+        while (rs.next()) {
+            String salecode = rs.getString("MACTKM");
+            String productCode = rs.getString("MASANPHAM");
+            float percentDiscount = rs.getFloat("PHANTRAMKM");
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()){
-               String salecode = rs.getString("MACTKM");
-               String productCode = rs.getString("MASANPHAM");
-               float percentDiscount = rs.getFloat("PHANTRAMKM");
-
-               saleDetails.add(new SaleDetail(salecode, productCode, percentDiscount));
-            }
-        }
-        catch (ClassNotFoundException | SQLException ex){
-            System.out.println("cannot connect loi~ r fen");
+            saleDetails.add(new SaleDetail(salecode, productCode, percentDiscount));
         }
 
         return saleDetails;
