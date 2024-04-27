@@ -1,18 +1,14 @@
 package DTO;
 
-import Interface.IList;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Bill implements IList<BillDetail> {
+public class Bill {
     private String billCode;
     private String customerCode;
     private String employeeCode;
     private double total;
-    private LocalDateTime dateCreated;
-
-    private ArrayList<BillDetail> billDetails;
+    private java.sql.Date dateCreated;
 
     public Bill(){
 
@@ -56,36 +52,12 @@ public class Bill implements IList<BillDetail> {
         return total;
     }
 
-    public void setDateCreated(LocalDateTime dateCreated) {
+    public void setDateCreated(java.sql.Date dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    public LocalDateTime getDateCreated() {
+    public java.sql.Date getDateCreated() {
         return dateCreated;
     }
 
-    public void setReceiptDetails(ArrayList<BillDetail> receiptDetails) {
-        this.billDetails = receiptDetails;
-    }
-
-    public ArrayList<BillDetail> getReceiptDetails() {
-        return billDetails;
-    }
-
-    public void add(BillDetail detail){
-        this.billDetails.add(detail);
-        this.total += detail.getTotal();
-    }
-
-    public void remove(BillDetail detail){
-        this.billDetails.remove(detail);
-        this.total -= detail.getTotal();
-    }
-
-    public void calculateTotal(){
-        this.total = 0;
-        for (var detail : this.billDetails){
-            this.total += detail.getTotal();
-        }
-    }
 }

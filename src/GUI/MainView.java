@@ -54,14 +54,15 @@ public class MainView {
                                         int gridy,
                                         int gridwidth,
                                         int gridheight,
-                                        int ipadx) {
+                                        int anchor,
+                                        Insets insets) {
         GridBagConstraints cons = new GridBagConstraints();
         cons.gridx = gridx;
         cons.gridy = gridy;
         cons.gridwidth = gridwidth;
         cons.gridheight = gridheight;
-        cons.ipadx = ipadx;
-        cons.anchor = GridBagConstraints.CENTER;
+        cons.anchor = anchor;
+        cons.insets = insets;
         container.add(item, cons);
     }
 
@@ -111,8 +112,11 @@ public class MainView {
         createHomeButton();
         createSearchBar();
 
-        addComponentToGrid(container, homeButton, 0, 0, 1, 0, 50);
-        addComponentToGrid(container, searchPanel, 1, 0, 1, 0, 50);
+        addComponentToGrid(container, homeButton, 0, 0, 1, 0,
+                GridBagConstraints.LINE_START, new Insets(0, 0, 0, 40));
+
+        addComponentToGrid(container, searchPanel, 1, 0, 1, 0,
+                GridBagConstraints.CENTER, new Insets(0, 0, 0, 40));
 
         navigatePanel.add(container);
     }

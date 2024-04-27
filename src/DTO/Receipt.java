@@ -1,18 +1,14 @@
 package DTO;
 
-import Interface.IList;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Receipt implements IList<ReceiptDetail> {
+public class Receipt {
     private String receiptCode;
     private String employeeCode;
     private String supplierCode;
     private LocalDateTime dateCreated;
     private double total;
-
-    private ArrayList<ReceiptDetail> receiptDetails;
 
     public Receipt(){
 
@@ -62,22 +58,5 @@ public class Receipt implements IList<ReceiptDetail> {
 
     public double getTotal() {
         return total;
-    }
-
-    public void add(ReceiptDetail detail){
-        this.receiptDetails.add(detail);
-        calculateTotal();
-    }
-
-    public void remove(ReceiptDetail detail){
-        this.receiptDetails.remove(detail);
-        calculateTotal();
-    }
-
-    public void calculateTotal(){
-        this.total = 0;
-        for (var detail : this.receiptDetails){
-            this.total += detail.getTotal();
-        }
     }
 }
