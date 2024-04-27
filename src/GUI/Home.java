@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 
 public class Home implements IView {
     private JPanel homePanel;
-    private JButton kakakaButton;
 
     public Home(){
         homePanel.setBackground(new Color(255, 238, 225));

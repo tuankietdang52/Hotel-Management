@@ -1,27 +1,24 @@
 package DTO;
 
-import Interface.IList;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Sale implements IList<SaleDetail> {
+public class Sale {
     private String saleCode;
     private String name;
-    private LocalDateTime dateStart;
-    private LocalDateTime dateEnd;
-
-    private ArrayList<SaleDetail> saleDetails;
+    private java.sql.Date dateStart;
+    private java.sql.Date dateEnd;
+    private String imagePath;
 
     public Sale(){
 
     }
 
-    public Sale(String saleCode, String name, LocalDateTime dateStart, LocalDateTime dateEnd){
+    public Sale(String saleCode, String name, java.sql.Date dateStart, java.sql.Date dateEnd, String imagePath){
         this.saleCode = saleCode;
         this.name = name;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
+        this.imagePath = imagePath;
     }
 
     public void setSaleCode(String saleCode) {
@@ -40,34 +37,27 @@ public class Sale implements IList<SaleDetail> {
         return name;
     }
 
-    public void setDateStart(LocalDateTime dateStart) {
+    public void setDateStart(java.sql.Date dateStart) {
         this.dateStart = dateStart;
     }
 
-    public LocalDateTime getDateStart() {
+    public java.sql.Date getDateStart() {
         return dateStart;
     }
 
-    public void setDateEnd(LocalDateTime dateEnd) {
+    public void setDateEnd(java.sql.Date dateEnd) {
         this.dateEnd = dateEnd;
     }
 
-    public LocalDateTime getDateEnd() {
+    public java.sql.Date getDateEnd() {
         return dateEnd;
     }
 
-    @Override
-    public void add(SaleDetail item) {
-        this.saleDetails.add(item);
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
-    @Override
-    public void remove(SaleDetail item) {
-        this.saleDetails.remove(item);
-    }
-
-    @Override
-    public void calculateTotal() {
-
+    public String getImagePath() {
+        return imagePath;
     }
 }
