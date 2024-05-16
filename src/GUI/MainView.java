@@ -1,14 +1,16 @@
 package GUI;
 
+import Interface.IList;
 import Utilities.ImageUtils;
+import Utilities.RoundButton;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.font.GlyphVector;
-import java.util.concurrent.Flow;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 
 public class MainView {
@@ -19,7 +21,7 @@ public class MainView {
     private JPanel navigatePanel;
     private JButton homeButton;
     private JTextField searchBar;
-    private JButton searchButton;
+    private RoundButton searchButton;
     private JPanel searchPanel;
 
     //endregion
@@ -94,11 +96,10 @@ public class MainView {
         searchBar.setFont(searchBar.getFont().deriveFont(30f));
         searchBar.setPreferredSize(new Dimension(430, 50));
 
-        searchButton = new JButton();
         ImageIcon image = ImageUtils.loadImageResource(getClass(), "/Assets/search.png");
-        image = ImageUtils.resizeImage(image, 40, 40);
+        image = ImageUtils.resizeImage(image, 30, 30);
 
-        searchButton.setIcon(image);
+        searchButton = new RoundButton(10, image);
         searchButton.setPreferredSize(new Dimension(70, 50));
         searchButton.setBackground(new Color(255, 0, 0));
 
@@ -174,7 +175,6 @@ public class MainView {
 
         changeContent("Home");
     }
-
 
     public void changeContent(String formName){
         CardLayout layout = (CardLayout) contentPanel.getLayout();

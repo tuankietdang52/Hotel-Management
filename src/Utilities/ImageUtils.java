@@ -11,30 +11,28 @@ import java.io.InputStream;
 
 public class ImageUtils {
     /**
-     *
-     * @param cls: use getClass()
+     * @param cls:      use getClass()
      * @param pathname: name of path
-     * @exception NullPointerException: throw when cls is null
+     * @throws NullPointerException: throw when cls is null
      */
-    public static ImageIcon loadImageResource(Class<?> cls, String pathname){
+    public static ImageIcon loadImageResource(Class<?> cls, String pathname) {
         if (cls == null) throw new NullPointerException();
 
         ImageIcon image = null;
-        try{
+        try {
             InputStream stream = cls.getResourceAsStream(pathname);
             if (stream == null) throw new NullPointerException();
 
             BufferedImage resource = ImageIO.read(stream);
             image = new ImageIcon(resource);
-        }
-        catch (NullPointerException | IOException ex){
+        } catch (NullPointerException | IOException ex) {
             System.out.println("Cannot load file\n" + ex.getMessage());
         }
 
         return image;
     }
 
-    public static @NotNull ImageIcon resizeImage(@NotNull ImageIcon imageIcon, int width, int height){
+    public static @NotNull ImageIcon resizeImage(@NotNull ImageIcon imageIcon, int width, int height) {
         Image image = imageIcon.getImage();
         Image resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(resizedImage);
