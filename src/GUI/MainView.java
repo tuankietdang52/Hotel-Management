@@ -8,9 +8,12 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.font.GlyphVector;
+import java.util.concurrent.Flow;
 
 
 public class MainView {
+    //region GUI Field
+
     private JPanel mainPanel;
     private JPanel contentPanel;
     private JPanel navigatePanel;
@@ -18,6 +21,8 @@ public class MainView {
     private JTextField searchBar;
     private JButton searchButton;
     private JPanel searchPanel;
+
+    //endregion
 
     public void setup(){
         initNavigatePanel();
@@ -130,7 +135,7 @@ public class MainView {
     }
 
     private void setupContent(){
-        contentPanel.add(new Home().GetPanel(), "Home");
+        contentPanel.add(new Home().getPanel(), "Home");
     }
 
     private void setupMainPanel(){
@@ -163,7 +168,9 @@ public class MainView {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.setSize(1200, 900);
-        frame.setResizable(true);
+        frame.setResizable(false);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
 
         changeContent("Home");
     }
