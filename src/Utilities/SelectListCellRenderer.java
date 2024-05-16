@@ -1,12 +1,12 @@
 package Utilities;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class SelectListCellRenderer extends JLabel implements ListCellRenderer<Object> {
     private final Color borderColor;
     private String text;
+    private boolean isSelected;
     public SelectListCellRenderer(Color borderColor){
         this.borderColor = borderColor;
         setOpaque(false);
@@ -16,6 +16,7 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
     public Component getListCellRendererComponent(JList list, Object value, int index,
                                                   boolean isSelected, boolean cellHasFocus) {
         text = value.toString();
+        this.isSelected = isSelected;
 
         if (isSelected){
             setForeground(list.getSelectionForeground());
@@ -23,7 +24,7 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
             setBorder(new RoundBorder(borderColor, 10));
         }
         else{
-            setForeground(list.getSelectionForeground());
+            setForeground(Color.BLACK);
             setBackground(list.getSelectionBackground());
         }
 
@@ -33,6 +34,13 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        if (!isSelected){
+            drawText(g);
+            g.dispose();
+            return;
+        }
+
         Dimension arcs = new Dimension(10,10);
         int width = getWidth();
         int height = getHeight();
@@ -43,13 +51,21 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
         g2d.setColor(getBackground());
         //paint background
         g2d.fillRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
-        g2d.setColor(getForeground());
+        g2d.setColor(borderColor);
         g2d.drawRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
+
+        drawText(g);
+        g.dispose();
+    }
+
+    private void drawText(Graphics g){
+        Graphics2D g2d = (Graphics2D) g;
 
         FontMetrics fontMetrics = g2d.getFontMetrics();
         int x = (getWidth() - fontMetrics.stringWidth(text)) / 2;
         int y = ((getHeight() - fontMetrics.getHeight()) / 2) + fontMetrics.getAscent();
 
+        g.setColor(getForeground());
         g.drawString(text, x, y);
     }
 }

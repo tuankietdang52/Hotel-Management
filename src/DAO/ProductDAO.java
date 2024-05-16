@@ -3,7 +3,6 @@ package DAO;
 import DTO.Product;
 import SQL.SqlConnect;
 
-import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,23 +10,23 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ProductDAO extends BaseDAO{
-    private ArrayList<Product> listProduct;
+    private final ArrayList<Product> listProduct;
 
     public ProductDAO(){
         listProduct = new ArrayList<>();
     }
 
     public ArrayList<Product> getListProduct(){
-        return  listProduct;
+        return listProduct;
     }
 
     @Override
     protected void RetrieveData() {
         String query = "SELECT * FROM SANPHAM";
 
-        Connection cnt = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        Connection cnt;
+        PreparedStatement stmt;
+        ResultSet rs;
 
         try{
             cnt = SqlConnect.getConnection();

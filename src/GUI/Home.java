@@ -1,21 +1,15 @@
 package GUI;
 
-import BUS.HomeBUS;
-import DTO.Product;
+import BUS.ProductBUS;
 import Interface.IView;
+import Utilities.RoundBorder;
 import Utilities.SelectListCellRenderer;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
-public class Home implements IView {
+public class Home implements IView{
     //region GUI Field
 
     private JPanel homePanel;
@@ -24,10 +18,14 @@ public class Home implements IView {
 
     //endregion
 
-    private HomeBUS homeBUS;
+    //region BUS Field
+
+    private final ProductBUS productBUS;
+
+    //endregion
 
     public Home(){
-        homeBUS = new HomeBUS();
+        productBUS = new ProductBUS();
 
         homePanel.setBackground(new Color(255, 238, 225));
         homePanel.setLayout(new GridLayout(1, 1));
@@ -48,7 +46,7 @@ public class Home implements IView {
 
     private void setupContentPanel(){
         content = new JPanel();
-        content.setPreferredSize(new Dimension(1200, 800));
+        content.setPreferredSize(new Dimension(1200, 700));
         content.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         content.setBackground(new Color(255, 238, 225));
 
@@ -81,17 +79,17 @@ public class Home implements IView {
     }
 
     private void setupProductPanel(){
-        String[] list = {"San pham"};
+        String[] list = {"San pham", "Moi ra mat"};
         addSelectList(list);
 
         productPanel = new JPanel();
-        productPanel.setPreferredSize(new Dimension(1200, 200));
-        productPanel.setBorder(new LineBorder(Color.BLACK, 1, true));
+        productPanel.setPreferredSize(new Dimension(1198, 200));
+        productPanel.setBorder(new LineBorder(Color.BLACK, 1));
         productPanel.setBackground(new Color(255, 238, 225));
 
         content.add(productPanel);
 
-        int length = homeBUS.getListProduct().size();
+        int length = productBUS.getListProduct().size();
 
         if (length == 0){
             productPanel.setLayout(new BorderLayout());
