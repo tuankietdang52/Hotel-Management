@@ -44,7 +44,6 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
             return;
         }
 
-        Dimension arcs = new Dimension(50,50);
         int width = getWidth();
         int height = getHeight();
         Graphics2D g2d = (Graphics2D) g;
