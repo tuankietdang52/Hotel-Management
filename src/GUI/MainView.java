@@ -23,7 +23,7 @@ public class MainView {
 
     //endregion
 
-    // Size for content panel: 1200 800
+    // Size for content panel: 1000 900
 
     public MainView(){
         setupNavigatePanel();
@@ -42,6 +42,7 @@ public class MainView {
 
     private void setupContent(){
         contentPanel.add(new Home().getPanel(), "Home");
+        contentPanel.add(new ProductGUI().getPanel(), "Sản phẩm");
     }
 
     private void setupNavigatePanel(){
@@ -104,6 +105,8 @@ public class MainView {
         navigateList.setSelectionBackground(Color.red);
         navigateList.setSelectedIndex(-1);
 
+        navigateList.addListSelectionListener(e -> changeContent(navigateList.getSelectedValue()));
+
         return navigateList;
     }
 
@@ -111,7 +114,7 @@ public class MainView {
         JPanel homeButtonPanel = getHomeButtonPanel();
         navigatePanel.add(homeButtonPanel);
 
-        String[] list = {"Sản phẩm", "Nhân viên", "Khách hàng", "Nhà cung cấp", "Hóa đơn", "Phiếu nhập"};
+        String[] list = {"Sản phẩm", "Nhân viên", "Khách hàng", "Nhà cung cấp", "Hóa đơn", "Phiếu nhập", "Khuyến mãi"};
         JList<String> navigateList = getNavigateList(list);
         navigatePanel.add(navigateList);
     }
