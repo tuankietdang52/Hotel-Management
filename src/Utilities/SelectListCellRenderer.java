@@ -1,15 +1,18 @@
 package Utilities;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 public class SelectListCellRenderer extends JLabel implements ListCellRenderer<Object> {
     private final Color borderColor;
     private String text;
     private boolean isSelected;
+
     public SelectListCellRenderer(Color borderColor){
         this.borderColor = borderColor;
         setOpaque(false);
+        setFont(getFont().deriveFont(Font.BOLD, 20));
     }
 
     @Override
@@ -24,8 +27,9 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
             setBorder(new RoundBorder(borderColor, 10));
         }
         else{
-            setForeground(Color.BLACK);
+            setForeground(Color.WHITE);
             setBackground(list.getSelectionBackground());
+            setBorder(new MatteBorder(1, 0, 1, 0, Color.blue));
         }
 
         return this;
@@ -36,24 +40,27 @@ public class SelectListCellRenderer extends JLabel implements ListCellRenderer<O
         super.paintComponent(g);
 
         if (!isSelected){
-            drawText(g);
-            g.dispose();
+            paintUnselected(g);
             return;
         }
 
-        Dimension arcs = new Dimension(10,10);
+        Dimension arcs = new Dimension(50,50);
         int width = getWidth();
         int height = getHeight();
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        //draws the rounded opaque panel with borders.
-        g2d.setColor(getBackground());
-        //paint background
-        g2d.fillRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
-        g2d.setColor(borderColor);
-        g2d.drawRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
+        Color secondColor = new Color(33, 33, 33);
 
+        GradientPaint gp = new GradientPaint(0, 0, Color.red, width, height, secondColor);
+        g2d.setPaint(gp);
+        g2d.fillRect(0, 0, width, height);
+
+        drawText(g);
+        g.dispose();
+    }
+
+    private void paintUnselected(Graphics g){
         drawText(g);
         g.dispose();
     }

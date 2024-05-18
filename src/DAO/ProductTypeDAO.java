@@ -11,23 +11,50 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ProductTypeDAO extends BaseDAO {
-    private final ArrayList<ProductType> listProductType;
-
     public ProductTypeDAO(){
-        listProductType = new ArrayList<>();
+
     }
 
-    public ArrayList<ProductType> getListProductType() {
-        return listProductType;
+    private ProductType getModel(ResultSet rs) throws SQLException{
+        String typeCode = rs.getString("MALOAI");
+        String typeName = rs.getString("TENLOAI");
+
+        return new ProductType(typeCode, typeName);
     }
 
-    @Override
-    protected void RetrieveData() {
+    public ProductType findProductTypebyCode(String code){
+        String query = String.format("SELECT * FROM LOAI WHERE MALOAI = '%s'", code);
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) return null;
+
+            return getModel(rs);
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi");
+            return null;
+        }
+        finally {
+            closingConnection(cnt, stmt, rs);
+        }
+    }
+
+    public ArrayList<ProductType> getProductTypeData() {
+        ArrayList<ProductType> listProductType = new ArrayList<>();
+
         String query = "SELECT * FROM LOAI";
 
-        Connection cnt;
-        PreparedStatement stmt;
-        ResultSet rs;
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try{
             cnt = SqlConnect.getConnection();
@@ -35,14 +62,17 @@ public class ProductTypeDAO extends BaseDAO {
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                String typeCode = rs.getString("MALOAI");
-                String typeName = rs.getString("TENLOAI");
-
-                listProductType.add(new ProductType(typeCode, typeName));
+                ProductType productType = getModel(rs);
+                listProductType.add(productType);
             }
         }
         catch (SQLException | ClassNotFoundException ex){
             System.out.println("Khong the ket noi");
         }
+        finally {
+            closingConnection(cnt, stmt, rs);
+        }
+
+        return listProductType;
     }
 }

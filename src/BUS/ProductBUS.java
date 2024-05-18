@@ -5,6 +5,7 @@ import DAO.ProductTypeDAO;
 import DTO.Product;
 import DTO.ProductType;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class ProductBUS {
@@ -17,10 +18,10 @@ public class ProductBUS {
     }
 
     public ArrayList<Product> getListProduct(){
-        return productDao.getListProduct();
+        return productDao.getProductData();
     }
 
     public ArrayList<ProductType> getListProductType(){
-        return productTypeDAO.getListProductType();
+        return productTypeDAO.getProductTypeData();
     }
 }
