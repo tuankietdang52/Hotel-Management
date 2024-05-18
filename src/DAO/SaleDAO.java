@@ -9,72 +9,101 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class SaleDAO extends BaseDAO {
-    private ArrayList<Sale> saleModels;
 
-    public SaleDAO(){
-        saleModels = new ArrayList<>();
-        RetrieveData();
+    public SaleDAO(){}
+
+    private Sale getSaleModel(ResultSet rs) throws SQLException{
+        String code = rs.getString("MACTKM");
+        String name = rs.getString("TEN");
+        java.sql.Date dateStart = rs.getDate("NGAYBATDAU");
+        java.sql.Date dateEnd = rs.getDate("NGAYKETTHUC");
+//        String imagePath = rs.getString("HINH");
+
+        return new Sale(code, name, dateStart, dateEnd, "");
     }
 
-    public void setSaleModels(ArrayList<Sale> saleModels) {
-        this.saleModels = saleModels;
+    private SaleDetail getSaleDetailModel(ResultSet rs) throws SQLException{
+        String salecode = rs.getString("MACTKM");
+        String productCode = rs.getString("MASANPHAM");
+        float percentDiscount = rs.getFloat("PHANTRAMKM");
+
+        return new SaleDetail(salecode, productCode, percentDiscount);
     }
 
-    public ArrayList<Sale> getSaleModels() {
-        return saleModels;
-    }
-
-    @Override
-    protected void RetrieveData(){
+    public ArrayList<Sale> getSaleData(){
+        ArrayList<Sale> listSale = new ArrayList<>();
         String query = "SELECT * FROM CHITIET_KM";
 
         Connection con = null;
-        Statement stmt = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
             con = SqlConnect.getConnection();
-            stmt = con.createStatement();
+            stmt = con.prepareStatement(query);
 
-            rs = stmt.executeQuery(query);
+            rs = stmt.executeQuery();
             while (rs.next()){
-                String code = rs.getString("MACTKM");
-                String name = rs.getString("TEN");
-                java.sql.Date dateStart = rs.getDate("NGAYBATDAU");
-                java.sql.Date dateEnd = rs.getDate("NGAYKETTHUC");
-                String imagePath = rs.getString("HINH");
+                Sale sale = getSaleModel(rs);
 
-                Sale model = new Sale(code, name, dateStart, dateEnd, imagePath);
-                model.setSaleDetails(getSaleDetails(code, stmt));
+                sale.setSaleDetails(getSaleDetailsByCode(sale.getSaleCode(), con));
 
-                saleModels.add(model);
+                listSale.add(sale);
             }
         }
         catch (ClassNotFoundException | SQLException ex){
-            System.out.println("cannot connect loi~ r fen");
+            System.out.println(ex.getMessage());
         }
         finally {
-           ClosingConnection(con, stmt, rs);
+           closingConnection(con, stmt, rs);
         }
+
+        return listSale;
     }
 
-    private @NotNull ArrayList<SaleDetail> getSaleDetails(String saleCode, @NotNull Statement stmt) throws SQLException{
-        String query = """
-                        SELECT *
-                         FROM CHITIET_KMSP
-                          WHERE MACTKM =""" + saleCode;
+    public ArrayList<SaleDetail> getSaleDetailsByCode(String saleCode){
+        String query = String.format("SELECT * FROM CHITIET_KMSP WHERE MACTKM = '%s'", saleCode);
 
         ArrayList<SaleDetail> saleDetails = new ArrayList<>();
-        ResultSet rs = stmt.executeQuery(query);
 
-        while (rs.next()) {
-            String salecode = rs.getString("MACTKM");
-            String productCode = rs.getString("MASANPHAM");
-            float percentDiscount = rs.getFloat("PHANTRAMKM");
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
-            saleDetails.add(new SaleDetail(salecode, productCode, percentDiscount));
+        try{
+            con = SqlConnect.getConnection();
+            stmt = con.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                SaleDetail saleDetail = getSaleDetailModel(rs);
+                saleDetails.add(saleDetail);
+            }
+        }
+        catch (ClassNotFoundException | SQLException ex){
+            System.out.println(ex.getMessage());
+        }
+        finally {
+            closingConnection(con, stmt, rs);
         }
 
+        return saleDetails;
+    }
+
+    private ArrayList<SaleDetail> getSaleDetailsByCode(String saleCode, Connection con) throws SQLException{
+        String query = String.format("SELECT * FROM CHITIET_KMSP WHERE MACTKM = '%s'", saleCode);
+
+        ArrayList<SaleDetail> saleDetails = new ArrayList<>();
+
+        PreparedStatement stmt = con.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            SaleDetail saleDetail = getSaleDetailModel(rs);
+            saleDetails.add(saleDetail);
+        }
+
+        stmt.close();
         return saleDetails;
     }
 }

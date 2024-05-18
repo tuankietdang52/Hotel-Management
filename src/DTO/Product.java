@@ -96,4 +96,16 @@ public class Product {
     public double getPrice() {
         return price;
     }
+
+    @Override
+    public String toString() {
+        System.out.println("San pham: " + productName);
+        System.out.println("Ma: " + productCode);
+        System.out.println("Loai: " + typeCode);
+        System.out.println("So luong: " + quantity);
+        System.out.println("Mo ta: " + description);
+        System.out.println("Gia: " + price);
+
+        return "";
+    }
 }

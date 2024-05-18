@@ -10,23 +10,55 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ProductDAO extends BaseDAO{
-    private final ArrayList<Product> listProduct;
 
     public ProductDAO(){
-        listProduct = new ArrayList<>();
+
     }
 
-    public ArrayList<Product> getListProduct(){
-        return listProduct;
+    private Product getModel(ResultSet rs) throws SQLException{
+        String productCode = rs.getString("MASANPHAM");
+        String productName = rs.getString("TENSANPHAM");
+        int quantity = rs.getInt("SOLUONG");
+        String typeCode = rs.getString("MALOAI");
+        String description = rs.getString("MOTA");
+        float price = rs.getFloat("DONGIA");
+//        String imagePath = rs.getString("HINH");
+
+        return new Product(productCode, productName, typeCode, quantity, description, "", price);
     }
 
-    @Override
-    protected void RetrieveData() {
+    public Product findProductbyCode(String code){
+        String query = String.format("SELECT * FROM SANPHAM WHERE MASANPHAM = '%s'", code);
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) return null;
+
+            return getModel(rs);
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi");
+            return null;
+        }
+        finally {
+            closingConnection(cnt, stmt, rs);
+        }
+    }
+
+    public ArrayList<Product> getProductData() {
+        ArrayList<Product> listProduct = new ArrayList<>();
         String query = "SELECT * FROM SANPHAM";
 
-        Connection cnt;
-        PreparedStatement stmt;
-        ResultSet rs;
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try{
             cnt = SqlConnect.getConnection();
@@ -34,18 +66,17 @@ public class ProductDAO extends BaseDAO{
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                String productCode = rs.getString("MASANPHAM");
-                String productName = rs.getString("TENSANPHAM");
-                int quantity = rs.getInt("SOLUONG");
-                String description = rs.getString("MOTA");
-                float price = rs.getFloat("DONGIA");
-                String imagePath = rs.getString("HINH");
-
-                listProduct.add(new Product(productCode, productName, "d", quantity, description, imagePath, price));
+                Product product = getModel(rs);
+                listProduct.add(product);
             }
         }
         catch (SQLException | ClassNotFoundException ex){
             System.out.println("Khong the ket noi");
         }
+        finally {
+            closingConnection(cnt, stmt, rs);
+        }
+
+        return listProduct;
     }
 }

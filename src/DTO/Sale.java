@@ -89,4 +89,9 @@ public class Sale implements IList<SaleDetail> {
     public void calculateTotal() {
 
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

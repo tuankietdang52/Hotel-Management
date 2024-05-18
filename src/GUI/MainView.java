@@ -1,16 +1,16 @@
 package GUI;
 
-import Interface.IList;
 import Utilities.ImageUtils;
-import Utilities.RoundButton;
+import Utilities.SelectListCellRenderer;
 import com.formdev.flatlaf.FlatDarculaLaf;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
+import java.util.concurrent.Callable;
 
 
 public class MainView {
@@ -19,119 +19,24 @@ public class MainView {
     private JPanel mainPanel;
     private JPanel contentPanel;
     private JPanel navigatePanel;
-    private JButton homeButton;
-    private JTextField searchBar;
-    private RoundButton searchButton;
-    private JPanel searchPanel;
+    private JList<String> navigateList;
 
     //endregion
 
-    public void setup(){
-        initNavigatePanel();
-        initContentPanel();
+    // Size for content panel: 1200 800
+
+    public MainView(){
+        setupNavigatePanel();
+        setupContentPanel();
         setupMainPanel();
     }
 
-    private void initNavigatePanel(){
-        navigatePanel = new JPanel();
-        navigatePanel.setVisible(false);
-        navigatePanel.setPreferredSize(new Dimension(1200, 100));
-
-        setupNavigatePanel();
-    }
-
-    private void addComponentToGrid(@NotNull JPanel container,
-                                    Component item,
-                                    int gridx,
-                                    int gridy,
-                                    int gridwidth,
-                                    int gridheight) {
-        GridBagConstraints cons = new GridBagConstraints();
-        cons.gridx = gridx;
-        cons.gridy = gridy;
-        cons.gridwidth = gridwidth;
-        cons.gridheight = gridheight;
-        cons.anchor = GridBagConstraints.CENTER;
-        container.add(item, cons);
-    }
-
-    private void addComponentToGrid(@NotNull JPanel container,
-                                        Component item,
-                                        int gridx,
-                                        int gridy,
-                                        int gridwidth,
-                                        int gridheight,
-                                        int anchor,
-                                        Insets insets) {
-        GridBagConstraints cons = new GridBagConstraints();
-        cons.gridx = gridx;
-        cons.gridy = gridy;
-        cons.gridwidth = gridwidth;
-        cons.gridheight = gridheight;
-        cons.anchor = anchor;
-        cons.insets = insets;
-        container.add(item, cons);
-    }
-
-    private void createHomeButton(){
-        homeButton = new JButton();
-        homeButton.setBorder(null);
-
-        ImageIcon image = ImageUtils.loadImageResource(getClass(), "/Assets/logo.png");
-        image = ImageUtils.resizeImage(image, 124, 50);
-
-        homeButton.setPreferredSize(new Dimension(124, 50));
-        homeButton.setIcon(image);
-    }
-
-    private void createSearchBar(){
-        searchPanel = new JPanel();
-        searchPanel.setVisible(false);
-        GridBagLayout layout = new GridBagLayout();
-
-        searchPanel.setLayout(layout);
-        searchPanel.setPreferredSize(new Dimension(500, 100));
-
-        searchBar = new JTextField();
-        searchBar.setFont(searchBar.getFont().deriveFont(30f));
-        searchBar.setPreferredSize(new Dimension(430, 50));
-
-        ImageIcon image = ImageUtils.loadImageResource(getClass(), "/Assets/search.png");
-        image = ImageUtils.resizeImage(image, 30, 30);
-
-        searchButton = new RoundButton(10, image);
-        searchButton.setPreferredSize(new Dimension(70, 50));
-        searchButton.setBackground(new Color(255, 0, 0));
-
-        addComponentToGrid(searchPanel, searchBar, 0, 0, 1, 1);
-        addComponentToGrid(searchPanel, searchButton, 1, 0, 2, 1);
-
-        searchPanel.setVisible(true);
-    }
-
-    private void setupNavigatePanel(){
-        JPanel container = new JPanel();
-        GridBagLayout layout = new GridBagLayout();
-        container.setLayout(layout);
-        container.setPreferredSize(new Dimension(1200, 100));
-
-        createHomeButton();
-        createSearchBar();
-
-        addComponentToGrid(container, homeButton, 0, 0, 1, 0,
-                GridBagConstraints.LINE_START, new Insets(0, 0, 0, 40));
-
-        addComponentToGrid(container, searchPanel, 1, 0, 1, 0,
-                GridBagConstraints.CENTER, new Insets(0, 0, 0, 40));
-
-        navigatePanel.add(container);
-    }
-
-    private void initContentPanel(){
+    private void setupContentPanel(){
         contentPanel = new JPanel();
         contentPanel.setVisible(false);
-        CardLayout layout = new CardLayout();
-        contentPanel.setLayout(layout);
+        contentPanel.setPreferredSize(new Dimension(1000, 900));
+        contentPanel.setLayout(new CardLayout());
+
         setupContent();
     }
 
@@ -139,15 +44,86 @@ public class MainView {
         contentPanel.add(new Home().getPanel(), "Home");
     }
 
-    private void setupMainPanel(){
-        BoxLayout layout = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);
+    private void setupNavigatePanel(){
+        navigatePanel = new JPanel();
+        navigatePanel.setVisible(false);
+        navigatePanel.setPreferredSize(new Dimension(200, 900));
+        navigatePanel.setMaximumSize(navigatePanel.getPreferredSize());
+        navigatePanel.setLayout(new BoxLayout(navigatePanel, BoxLayout.Y_AXIS));
+        navigatePanel.setBackground(new Color(33, 33, 33));
 
-        mainPanel.setLayout(layout);
+        setupNavigateComponent();
+    }
+
+    private JPanel getHomeButtonPanel(){
+        JPanel homeButtonPanel = new JPanel();
+        homeButtonPanel.setSize(new Dimension(200, 100));
+        homeButtonPanel.setMaximumSize(homeButtonPanel.getSize());
+        homeButtonPanel.setMinimumSize(homeButtonPanel.getSize());
+        homeButtonPanel.setBackground(new Color(33, 33, 33));
+        homeButtonPanel.setLayout(new GridBagLayout());
+
+        JButton homeButton = new JButton();
+        homeButton.setBackground(new Color(33, 33, 33));
+        homeButton.setBorder(null);
+
+        ImageIcon image = ImageUtils.loadImageResource(getClass(), "/Assets/logo.png");
+        image = ImageUtils.resizeImage(image, 124, 50);
+
+        homeButton.setSize(new Dimension(124, 50));
+        homeButton.setMaximumSize(homeButton.getPreferredSize());
+        homeButton.setIcon(image);
+
+        homeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        homeButton.addActionListener(e -> {
+            if (navigateList != null) navigateList.clearSelection();
+            changeContent("Home");
+        });
+
+        homeButtonPanel.add(homeButton);
+
+        return homeButtonPanel;
+    }
+
+    private JList<String> getNavigateList(String[] list){
+        navigateList = new JList<>(list);
+
+        SelectListCellRenderer renderer = new SelectListCellRenderer(Color.RED);
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        renderer.setVerticalAlignment(SwingConstants.CENTER);
+        navigateList.setCellRenderer(renderer);
+
+        navigateList.setPreferredSize(new Dimension(200, 800));
+        navigateList.setLayoutOrientation(JList.VERTICAL);
+        navigateList.setVisibleRowCount(1);
+        navigateList.setFixedCellHeight(70);
+        navigateList.setFixedCellWidth(200);
+        navigateList.setBackground(new Color(33, 33, 33));
+        navigateList.setForeground(Color.white);
+        navigateList.setSelectionForeground(Color.white);
+        navigateList.setSelectionBackground(Color.red);
+        navigateList.setSelectedIndex(-1);
+
+        return navigateList;
+    }
+
+    private void setupNavigateComponent(){
+        JPanel homeButtonPanel = getHomeButtonPanel();
+        navigatePanel.add(homeButtonPanel);
+
+        String[] list = {"Sản phẩm", "Nhân viên", "Khách hàng", "Nhà cung cấp", "Hóa đơn", "Phiếu nhập"};
+        JList<String> navigateList = getNavigateList(list);
+        navigatePanel.add(navigateList);
+    }
+
+    private void setupMainPanel(){
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
         mainPanel.setSize(new Dimension(1200, 800));
+        mainPanel.setBackground(new Color(33, 33, 33));
 
         mainPanel.add(navigatePanel);
-        navigatePanel.setVisible(true);
         mainPanel.add(contentPanel);
+        navigatePanel.setVisible(true);
         contentPanel.setVisible(true);
     }
 
