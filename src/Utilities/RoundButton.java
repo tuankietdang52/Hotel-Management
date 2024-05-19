@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 public class RoundButton extends JButton {
     private final int radius;
     private String text;
-    private Color borderColor = Color.black;
+    private Color borderColor = null;
     private ImageIcon image;
 
     public RoundButton(int radius, String text){
@@ -57,11 +57,14 @@ public class RoundButton extends JButton {
         g2d.setColor(getBackground());
         //paint background
         g2d.fillRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
-        g2d.setColor(borderColor);
-        g2d.drawRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
 
-        if (image == null) drawText(g);
-        else drawImage(g);
+        if (borderColor != null){
+            g2d.setColor(borderColor);
+            g2d.drawRoundRect(0, 0, width - 1, height - 1, arcs.width, arcs.height);
+        }
+
+        if (image != null) drawImage(g);
+        else drawText(g);
 
         drawBorder();
         super.paintComponent(g);
