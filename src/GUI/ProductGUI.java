@@ -1,23 +1,19 @@
 package GUI;
 
 import BUS.ProductBUS;
+import DTO.Product;
 import DTO.ProductTableModel;
 import Interface.IView;
-import Utilities.ImageUtils;
-import Utilities.RoundBorder;
-import Utilities.RoundButton;
+import Utilities.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 public class ProductGUI implements IView {
@@ -28,6 +24,7 @@ public class ProductGUI implements IView {
     private JPanel searchPanel;
     private JScrollPane scrollTable;
     private JTable productTable;
+    private JTextField searchArea;
 
     //endregion
 
@@ -65,15 +62,17 @@ public class ProductGUI implements IView {
 
         RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
                 e -> {
-
+                    ProductDialog addDialog = new ProductDialog("Thêm Sản Phẩm");
+                    addDialog.setVisible(true);
+                    addEventDialog(addDialog);
                 });
         RoundButton adjustButton = setupOptionButton("adjust.png", new Color(255, 127, 39),
                 e -> {
-
+                    showAdjustDialog();
                 });
         RoundButton removeButton = setupOptionButton("delete.png", new Color(255, 0, 0),
                 e -> {
-
+                    deleteProduct();
                 });
 
         container.add(addButton);
@@ -82,6 +81,46 @@ public class ProductGUI implements IView {
 
         optionPanel.add(container);
         contentPanel.add(optionPanel);
+    }
+
+    private void showAdjustDialog(){
+        if (productTable.getSelectedRow() == -1){
+            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
+            return;
+        }
+        String productCode = (String) productTable.getModel().getValueAt(productTable.getSelectedRow(), 0);
+        Product cur = productBUS.getProductByCode(productCode);
+
+        ProductDialog adjustDialog = new ProductDialog("Sửa sản phẩm", cur);
+        adjustDialog.setVisible(true);
+        addEventDialog(adjustDialog);
+    }
+
+    private void deleteProduct(){
+        if (productTable.getSelectedRow() == -1){
+            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
+            return;
+        }
+
+        if (!AppManager.showConfirmMessage("Ban co chac muon xoa san pham nay khong ?")){
+            return;
+        }
+
+        String productCode = (String) productTable.getModel().getValueAt(productTable.getSelectedRow(), 0);
+
+        Pair<Boolean, String> res = productBUS.removeProduct(productCode);
+        AppManager.showPopUpMessage(res.getLast());
+
+        if (res.getFirst()) resetTable();
+    }
+
+    private void addEventDialog(JDialog dialog){
+        dialog.addWindowListener(new WindowCloseListener() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                resetTable();
+            }
+        });
     }
 
     private RoundButton setupOptionButton(String imageName, Color color, ActionListener callback){
@@ -111,14 +150,7 @@ public class ProductGUI implements IView {
     }
 
     private void setupSearch(){
-        JTextField searchArea = new JTextField(){
-            @Override
-            protected void paintComponent(Graphics g) {
-                g.setColor(getBackground() );
-                g.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
-                super.paintComponent(g);
-            }
-        };
+        searchArea = new SearchField("Search...");
 
         searchArea.setPreferredSize(new Dimension(600, 50));
         searchArea.setFont(searchArea.getFont().deriveFont(Font.PLAIN, 20));
@@ -126,10 +158,14 @@ public class ProductGUI implements IView {
         searchArea.setOpaque(false);
         searchArea.setBackground(new Color(237, 221, 209));
 
-        ProductTableModel model = (ProductTableModel) productTable.getModel();
-        productTable.setRowSorter(model.createTableFilter(searchArea));
+        setRowSowrter();
 
         searchPanel.add(searchArea);
+    }
+
+    private void setRowSowrter(){
+        ProductTableModel model = (ProductTableModel) productTable.getModel();
+        productTable.setRowSorter(model.createTableFilter(searchArea));
     }
 
     private void setupFilter(){
@@ -139,9 +175,6 @@ public class ProductGUI implements IView {
         a.setBackground(new Color(255, 228, 203));
 
         a.setUI(new BasicComboBoxUI());
-        a.addItem("dfasdsa");
-        a.addItem("dfasdsa");
-        a.addItem("dfasdsa");
 
         searchPanel.add(a);
     }
@@ -150,9 +183,8 @@ public class ProductGUI implements IView {
         ArrayList<ArrayList<String>> data = productBUS.getProductToDataTable();
 
         productTable = new JTable(new ProductTableModel(data));
-        productTable.setSize(1000, 600);
 
-        productTable.setMaximumSize(productTable.getSize());
+        productTable.setSize(1000, 600);
 
         setupTableComponent();
 
@@ -160,6 +192,12 @@ public class ProductGUI implements IView {
         scrollTable.setBackground(new Color(255, 238, 225));
         scrollTable.getViewport().setBackground(new Color(255, 238, 225));
         scrollTable.setPreferredSize(new Dimension(1000, 600));
+    }
+
+    public void resetTable(){
+        ArrayList<ArrayList<String>> data = productBUS.getProductToDataTable();
+        ProductTableModel model = (ProductTableModel) productTable.getModel();
+        model.setData(data);
     }
 
     private void setupTableComponent(){
@@ -171,7 +209,6 @@ public class ProductGUI implements IView {
         columnModel.getColumn(4).setPreferredWidth(200);
 
         productTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         productTable.setRowHeight(50);
 
         JTableHeader header = productTable.getTableHeader();

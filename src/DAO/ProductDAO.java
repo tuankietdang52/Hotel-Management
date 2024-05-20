@@ -1,6 +1,7 @@
 package DAO;
 
 import DTO.Product;
+import DTO.ProductType;
 import SQL.SqlConnect;
 
 import java.sql.Connection;
@@ -79,4 +80,75 @@ public class ProductDAO extends BaseDAO{
 
         return listProduct;
     }
+
+    public boolean addProduct(Product product){
+        String query = String.format("INSERT INTO SANPHAM VALUES ('%s', '%s', '%s', %s, '%s', %s)",
+                product.getProductCode(), product.getProductName(), product.getTypeCode(),
+                product.getQuantity(), product.getDescription(), product.getPrice());
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            stmt.executeUpdate();
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi" + ex);
+            return false;
+        }
+        finally {
+            closingConnection(cnt, stmt, null);
+        }
+
+        return true;
+    }
+
+    public boolean adjustProduct(Product product){
+        String query = String.format("UPDATE SANPHAM SET TENSANPHAM = '%s', MALOAI = '%s', SOLUONG = %s, MOTA = '%s', DONGIA = %s WHERE MASANPHAM = '%s'",
+                product.getProductName(), product.getTypeCode(), product.getQuantity(),
+                product.getDescription(), product.getPrice(), product.getProductCode());
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            stmt.executeUpdate();
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi" + ex);
+            return false;
+        }
+        finally {
+            closingConnection(cnt, stmt, null);
+        }
+
+        return true;
+    }
+    public boolean deleteProduct(String productCode){
+        String query = String.format("DELETE FROM SANPHAM WHERE MASANPHAM = '%s'",
+                productCode);
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            stmt.executeUpdate();
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi" + ex);
+            return false;
+        }
+        finally {
+            closingConnection(cnt, stmt, null);
+        }
+
+        return true;
+    }
+
 }

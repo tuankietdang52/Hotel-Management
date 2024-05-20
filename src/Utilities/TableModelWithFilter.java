@@ -22,10 +22,15 @@ public abstract class TableModelWithFilter extends AbstractTableModel {
     }
 
     public void setData(ArrayList<ArrayList<String>> dataProduct){
-        if (data == null) data = new ArrayList<>();
+        if (dataProduct == null){
+            data = new ArrayList<>();
+            return;
+        }
 
-        data.clear();
+        if (data != null) data.clear();
         data = dataProduct;
+
+        System.out.println(data.size());
         fireTableDataChanged();
     }
 
@@ -57,7 +62,13 @@ public abstract class TableModelWithFilter extends AbstractTableModel {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                System.out.println("boo");
+                String text = searchArea.getText();
+
+                if (text.trim().isEmpty()) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
             }
         });
 
