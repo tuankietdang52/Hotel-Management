@@ -43,6 +43,8 @@ public class MainView {
     private void setupContent(){
         contentPanel.add(new Home().getPanel(), "Home");
         contentPanel.add(new ProductGUI().getPanel(), "Sản phẩm");
+        contentPanel.add(new EmployeeGUI().getPanel(), "Nhân viên");
+        contentPanel.add(new CustomerGUI().getPanel(), "Khách hàng");
     }
 
     private void setupNavigatePanel(){

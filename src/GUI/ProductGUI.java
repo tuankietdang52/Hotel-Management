@@ -3,41 +3,43 @@ package GUI;
 import BUS.ProductBUS;
 import DTO.Product;
 import DTO.ProductTableModel;
-import Interface.IView;
+import DTO.ProductType;
 import Utilities.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
+import java.util.Objects;
 
-public class ProductGUI implements IView {
+public class ProductGUI extends ViewWithTable {
     //region GUI Field
 
     private JPanel contentPanel;
     private JPanel optionPanel;
-    private JPanel searchPanel;
-    private JScrollPane scrollTable;
-    private JTable productTable;
-    private JTextField searchArea;
 
     //endregion
 
     private final ProductBUS productBUS;
 
     public ProductGUI(){
+        super(new ProductTableModel(new ProductBUS().getProductDataTable()));
+
         productBUS = new ProductBUS();
 
         setupPanel();
-        setupOptionPanel();
-        setupTable();
-        setupSearchAndFilter();
 
+        setupOptionPanel();
+        optionPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+        setupFilter();
+
+        setupTable();
+        setupSearchPanel();
+
+        contentPanel.add(searchPanel);
         contentPanel.add(scrollTable);
     }
 
@@ -52,12 +54,14 @@ public class ProductGUI implements IView {
 
     private void setupOptionPanel(){
         optionPanel = new JPanel();
-        optionPanel.setLayout(new GridBagLayout());
-        optionPanel.setPreferredSize(new Dimension(1000, 150));
+        optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.X_AXIS));
+        optionPanel.setPreferredSize(new Dimension(1000, 200));
         optionPanel.setBackground(new Color(255, 238, 225));
 
         JPanel container = new JPanel();
-        container.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setPreferredSize(new Dimension(490, 200));
+        container.setMaximumSize(container.getPreferredSize());
         container.setBackground(new Color(255, 238, 225));
 
         RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
@@ -67,28 +71,28 @@ public class ProductGUI implements IView {
                     addEventDialog(addDialog);
                 });
         RoundButton adjustButton = setupOptionButton("adjust.png", new Color(255, 127, 39),
-                e -> {
-                    showAdjustDialog();
-                });
+                e -> showAdjustDialog());
         RoundButton removeButton = setupOptionButton("delete.png", new Color(255, 0, 0),
-                e -> {
-                    deleteProduct();
-                });
+                e -> deleteProduct());
 
         container.add(addButton);
         container.add(adjustButton);
         container.add(removeButton);
+
+        addButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        adjustButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        removeButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
         optionPanel.add(container);
         contentPanel.add(optionPanel);
     }
 
     private void showAdjustDialog(){
-        if (productTable.getSelectedRow() == -1){
+        if (dataTable.getSelectedRow() == -1){
             AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
             return;
         }
-        String productCode = (String) productTable.getModel().getValueAt(productTable.getSelectedRow(), 0);
+        String productCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
         Product cur = productBUS.getProductByCode(productCode);
 
         ProductDialog adjustDialog = new ProductDialog("Sửa sản phẩm", cur);
@@ -97,7 +101,7 @@ public class ProductGUI implements IView {
     }
 
     private void deleteProduct(){
-        if (productTable.getSelectedRow() == -1){
+        if (dataTable.getSelectedRow() == -1){
             AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
             return;
         }
@@ -106,19 +110,19 @@ public class ProductGUI implements IView {
             return;
         }
 
-        String productCode = (String) productTable.getModel().getValueAt(productTable.getSelectedRow(), 0);
+        String productCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
 
         Pair<Boolean, String> res = productBUS.removeProduct(productCode);
         AppManager.showPopUpMessage(res.getLast());
 
-        if (res.getFirst()) resetTable();
+        if (res.getFirst()) setTableData(productBUS.getProductDataTable());
     }
 
     private void addEventDialog(JDialog dialog){
         dialog.addWindowListener(new WindowCloseListener() {
             @Override
             public void windowClosed(WindowEvent e) {
-                resetTable();
+                setTableData(productBUS.getProductDataTable());
             }
         });
     }
@@ -129,6 +133,9 @@ public class ProductGUI implements IView {
         RoundButton button = new RoundButton(20, image);
 
         button.setPreferredSize(new Dimension(110, 60));
+        button.setMaximumSize(button.getPreferredSize());
+        button.setMinimumSize(button.getPreferredSize());
+
         button.setBackground(color);
         button.setBorder(new EmptyBorder(0, 0, 0, 100));
 
@@ -138,89 +145,75 @@ public class ProductGUI implements IView {
         return button;
     }
 
-    private void setupSearchAndFilter(){
-        searchPanel = new JPanel();
-        searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        searchPanel.setPreferredSize(new Dimension(1000, 50));
-        searchPanel.setBackground(new Color(255, 238, 225));
-
-        setupSearch();
-        setupFilter();
-        contentPanel.add(searchPanel);
-    }
-
-    private void setupSearch(){
-        searchArea = new SearchField("Search...");
-
-        searchArea.setPreferredSize(new Dimension(600, 50));
-        searchArea.setFont(searchArea.getFont().deriveFont(Font.PLAIN, 20));
-        searchArea.setBorder(null);
-        searchArea.setOpaque(false);
-        searchArea.setBackground(new Color(237, 221, 209));
-
-        setRowSowrter();
-
-        searchPanel.add(searchArea);
-    }
-
-    private void setRowSowrter(){
-        ProductTableModel model = (ProductTableModel) productTable.getModel();
-        productTable.setRowSorter(model.createTableFilter(searchArea));
-    }
 
     private void setupFilter(){
-        JComboBox<String> a = new JComboBox<>();
-        a.setPreferredSize(new Dimension(200, 50));
-        a.setBorder(new RoundBorder(Color.black, 10));
-        a.setBackground(new Color(255, 228, 203));
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setPreferredSize(new Dimension(490, 200));
+        container.setMaximumSize(container.getPreferredSize());
+        container.setBackground(new Color(255, 238, 225));
 
-        a.setUI(new BasicComboBoxUI());
+        JComboBox<ProductType> companyFilter = createCompanyFilter();
+        companyFilter.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        searchPanel.add(a);
+
+        container.add(Box.createRigidArea(new Dimension(0, 70)));
+        container.add(companyFilter);
+        optionPanel.add(container);
     }
 
-    private void setupTable(){
-        ArrayList<ArrayList<String>> data = productBUS.getProductToDataTable();
+    private JComboBox<ProductType> createCompanyFilter(){
+        JComboBox<ProductType> companyFilter = new JComboBox<>();
+        companyFilter.addItem(new ProductType("all", "Tất cả"));
 
-        productTable = new JTable(new ProductTableModel(data));
+        for (ProductType productType : productBUS.getListProductType()){
+            companyFilter.addItem(productType);
+        }
 
-        productTable.setSize(1000, 600);
+        companyFilter.setPreferredSize(new Dimension(120, 50));
+        companyFilter.setMaximumSize(new Dimension(120, 50));
+        companyFilter.setBorder(new RoundBorder(Color.black, 10));
+        companyFilter.setBackground(new Color(255, 228, 203));
 
-        setupTableComponent();
+        companyFilter.setRenderer(new ComboBoxRenderer(new Color(255, 238, 225)));
+        companyFilter.addActionListener(e -> filtProductType(companyFilter));
 
-        scrollTable = new JScrollPane(productTable);
-        scrollTable.setBackground(new Color(255, 238, 225));
-        scrollTable.getViewport().setBackground(new Color(255, 238, 225));
-        scrollTable.setPreferredSize(new Dimension(1000, 600));
+        return companyFilter;
     }
 
-    public void resetTable(){
-        ArrayList<ArrayList<String>> data = productBUS.getProductToDataTable();
-        ProductTableModel model = (ProductTableModel) productTable.getModel();
-        model.setData(data);
+    private void filtProductType(JComboBox<ProductType> companyFilter){
+        var type = (ProductType) companyFilter.getModel().getSelectedItem();
+
+        if (Objects.equals(type.getTypeCode(), "all")){
+            setTableData(productBUS.getProductDataTable());
+            return;
+        }
+
+        var filtData = productBUS.filtProductTableByType(type);
+        setTableData(filtData);
     }
 
-    private void setupTableComponent(){
-        TableColumnModel columnModel = productTable.getColumnModel();
+    protected void setupTableComponent(){
+        TableColumnModel columnModel = dataTable.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(150);
         columnModel.getColumn(1).setPreferredWidth(300);
         columnModel.getColumn(2).setPreferredWidth(150);
         columnModel.getColumn(3).setPreferredWidth(200);
         columnModel.getColumn(4).setPreferredWidth(200);
 
-        productTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        productTable.setRowHeight(50);
+        dataTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        dataTable.setRowHeight(50);
 
-        JTableHeader header = productTable.getTableHeader();
+        JTableHeader header = dataTable.getTableHeader();
         header.setPreferredSize(new Dimension(10, 50));
         header.setFont(header.getFont().deriveFont(Font.BOLD, 15));
         header.setBackground(new Color(255, 92, 95));
 
-        productTable.setColumnModel(columnModel);
-        productTable.setBackground(new Color(255, 228, 203));
-        productTable.setSelectionBackground(new Color(255, 0, 0, 100));
-        productTable.getTableHeader().setResizingAllowed(false);
-        productTable.getTableHeader().setReorderingAllowed(false);
+        dataTable.setColumnModel(columnModel);
+        dataTable.setBackground(new Color(255, 228, 203));
+        dataTable.setSelectionBackground(new Color(255, 0, 0, 100));
+        dataTable.getTableHeader().setResizingAllowed(false);
+        dataTable.getTableHeader().setReorderingAllowed(false);
     }
 
     @Override
