@@ -1,35 +1,38 @@
 package GUI;
 
-import BUS.ProductBUS;
-import DTO.Product;
-import DTO.ProductType;
+import BUS.EmployeeBUS;
+import DTO.Employee;
 import Utilities.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Vector;
 
-public class ProductDialog extends JDialog {
+public class EmployeeDialog extends JDialog{
     //region GUI Field
 
     private JPanel dialogPanel;
     private JPanel contentPanel;
-    private JTextField nameTextField;
-    private JComboBox<ProductType> typeComboBox;
-    private JTextField priceTextField;
-    private JTextField quantityTextField;
-    private JTextArea desTextArea;
-    private Vector<ProductType> productTypes;
+    private JTextField firstNameTextField;
+    private JTextField lastNameTextField;
+    private JTextField usernameTextField;
+    private JTextField passwordTextField;
+    private JTextField addressTextField;
+    private JTextField jobTextField;
+    private JTextField salaryTextField;
+    private JTextField dateTextField;
 
     //endregion
 
-    private ProductBUS productBUS;
-    private Product currentProduct;
+    private EmployeeBUS employeeBUS;
+    private Employee currentEmployee;
     private boolean isAdjust = false;
 
-    public ProductDialog(String title){
+    public EmployeeDialog(String title){
         setPreferredSize(new Dimension(700, 700));
         setSize(getPreferredSize());
         setModal(true);
@@ -44,13 +47,13 @@ public class ProductDialog extends JDialog {
         add(dialogPanel);
     }
 
-    public ProductDialog(String title, Product currentProduct){
+    public EmployeeDialog(String title, Employee currentEmployee){
         setPreferredSize(new Dimension(700, 700));
         setSize(getPreferredSize());
         setModal(true);
         setLocationRelativeTo(null);
 
-        this.currentProduct = currentProduct;
+        this.currentEmployee = currentEmployee;
         isAdjust = true;
 
         setTitle(title);
@@ -64,7 +67,7 @@ public class ProductDialog extends JDialog {
     }
 
     private void setup(){
-        productBUS = new ProductBUS();
+        employeeBUS = new EmployeeBUS();
 
         dialogPanel = new JPanel();
         dialogPanel.setPreferredSize(getPreferredSize());
@@ -149,79 +152,95 @@ public class ProductDialog extends JDialog {
         return textArea;
     }
 
-    private JPanel createProductTypeComboBox(Vector<ProductType> items){
-        JPanel panel = new JPanel();
-        panel.setPreferredSize(new Dimension(300, 60));
-        panel.setMaximumSize(panel.getPreferredSize());
-        panel.setMinimumSize(panel.getPreferredSize());
-        panel.setBackground(new Color(255, 238, 225));
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+    private JTextField createDateTextField(){
+        JTextField formattedTextField = new JTextField(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(getBackground());
 
-        typeComboBox = new JComboBox<>(items);
-        typeComboBox.setRenderer(new ComboBoxRenderer(new Color(255, 238, 225)));
-        typeComboBox.setPreferredSize(new Dimension(300, 60));
-        typeComboBox.setMaximumSize(typeComboBox.getPreferredSize());
-        typeComboBox.setMinimumSize(typeComboBox.getPreferredSize());
-        typeComboBox.setBorder(new RoundBorder(Color.black, 10));
+                if (!getText().isEmpty()) return;
 
-        typeComboBox.setFont(new Font("Times new Roman", Font.PLAIN, 20));
+                setFont(getFont().deriveFont(Font.ITALIC, 15));
+                Graphics2D g2d = (Graphics2D) g;
 
-        panel.add(typeComboBox);
-        return panel;
+                FontMetrics fontMetrics = g2d.getFontMetrics();
+                int x = 10;
+                int y = ((getHeight() - fontMetrics.getHeight()) / 2) + fontMetrics.getAscent();
+
+                g.setColor(new Color(143, 143, 143));
+                g.drawString("Nhập theo định dạng yyyy-mm-dd", x, y);
+            }
+        };
+
+        formattedTextField.setPreferredSize(new Dimension(300, 30));
+        formattedTextField.setMaximumSize(formattedTextField.getPreferredSize());
+        formattedTextField.setMinimumSize(formattedTextField.getPreferredSize());
+        formattedTextField.setBackground(new Color(237, 221, 209));
+        formattedTextField.setForeground(Color.black);
+        formattedTextField.setFont(formattedTextField.getFont().deriveFont(Font.PLAIN, 15));
+        formattedTextField.setBorder(null);
+
+        return formattedTextField;
     }
 
     private void setupComponent(){
-        nameTextField = createTextField();
-        priceTextField = createTextField();
-        quantityTextField = createTextField();
-        desTextArea = createTextArea();
+        firstNameTextField = createTextField();
+        lastNameTextField = createTextField();
+        usernameTextField = createTextField();
+        passwordTextField = createTextField();
+        addressTextField = createTextField();
+        jobTextField = createTextField();
+        salaryTextField = createTextField();
+        dateTextField = createDateTextField();
 
-        productTypes = new Vector<>(productBUS.getListProductType());
-        JPanel typeComboBoxPanel = createProductTypeComboBox(productTypes);
-
-        addToContentPanel(createLabel("Tên sản phẩm:"), 0, 0, 1, 1,
+        addToContentPanel(createLabel("Họ nhân viên:"), 0, 0, 1, 1,
                 new Insets(0, 0, 10, 20));
-        addToContentPanel(createLabel("Loại:"), 1, 0, 1, 1,
+        addToContentPanel(createLabel("Tên nhân viên:"), 1, 0, 1, 1,
                 new Insets(0, 0, 10, 0));
-        addToContentPanel(nameTextField, 0, 1, 1, 1,
+        addToContentPanel(firstNameTextField, 0, 1, 1, 1,
                 new Insets(0, 0, 10, 20));
-        addToContentPanel(typeComboBoxPanel, 1, 1, 1, 1,
-                new Insets(0, 0, 10, 0));
-
-        addToContentPanel(createLabel("Đơn giá:"), 0, 2, 1, 1,
-                new Insets(0, 0, 10, 0));
-        addToContentPanel(createLabel("Số lượng tồn kho:"), 1, 2, 1, 1,
-                new Insets(0, 0, 10, 20));
-        addToContentPanel(priceTextField, 0, 3, 1, 1,
-                new Insets(0, 0, 10, 20));
-        addToContentPanel(quantityTextField, 1, 3, 1, 1,
+        addToContentPanel(lastNameTextField, 1, 1, 1, 1,
                 new Insets(0, 0, 10, 0));
 
-        addToContentPanel(createLabel("Mô tả"), 0, 4, 1, 1,
+        addToContentPanel(createLabel("Tài khoản:"), 0, 2, 1, 1,
                 new Insets(0, 0, 10, 20));
-        addToContentPanel(desTextArea, 0, 5, 1, 3,
+        addToContentPanel(createLabel("Mật khẩu:"), 1, 2, 1, 1,
+                new Insets(0, 0, 10, 0));
+        addToContentPanel(usernameTextField, 0, 3, 1, 1,
                 new Insets(0, 0, 10, 20));
+        addToContentPanel(passwordTextField, 1, 3, 1, 1,
+                new Insets(0, 0, 10, 0));
+
+        addToContentPanel(createLabel("Công việc:"), 0, 4, 1, 1,
+                new Insets(0, 0, 10, 20));
+        addToContentPanel(createLabel("Lương:"), 1, 4, 1, 1,
+                new Insets(0, 0, 10, 0));
+        addToContentPanel(jobTextField, 0, 5, 1, 1,
+                new Insets(0, 0, 10, 20));
+        addToContentPanel(salaryTextField, 1, 5, 1, 1,
+                new Insets(0, 0, 10, 0));
+
+        addToContentPanel(createLabel("Địa chỉ:"), 0, 6, 1, 1,
+                new Insets(0, 0, 10, 20));
+        addToContentPanel(createLabel("Ngày sinh:"), 1, 6, 1, 1,
+                new Insets(0, 0, 10, 0));
+        addToContentPanel(addressTextField, 0, 7, 1, 1,
+                new Insets(0, 0, 10, 20));
+        addToContentPanel(dateTextField, 1, 7, 1, 1,
+                new Insets(0, 0, 10, 0));
 
     }
 
     private void writeData(){
-        nameTextField.setText(currentProduct.getProductName());
-        quantityTextField.setText(Integer.toString(currentProduct.getQuantity()));
-        desTextArea.setText(currentProduct.getDescription());
-
-        priceTextField.setText(Integer.toString((int) currentProduct.getPrice()));
-
-        int curProductTypeIndex = getCurrentProductTypeIndex(currentProduct.getTypeCode());
-        typeComboBox.setSelectedIndex(curProductTypeIndex);
-    }
-
-    private int getCurrentProductTypeIndex(String code){
-        for (int i = 0; i < productTypes.size(); i++){
-            if (Objects.equals(code, productTypes.elementAt(i).getTypeCode())){
-                return i;
-            }
-        }
-        return -1;
+        firstNameTextField.setText(currentEmployee.getFirstName());
+        lastNameTextField.setText(currentEmployee.getLastName());
+        usernameTextField.setText(currentEmployee.getUsername());
+        passwordTextField.setText(currentEmployee.getPassword());
+        addressTextField.setText(currentEmployee.getAddress());
+        dateTextField.setText(currentEmployee.getBirthday().toString());
+        jobTextField.setText(currentEmployee.getJob());
+        salaryTextField.setText(Integer.toString((int)currentEmployee.getSalary()));
     }
 
     private void setupButtonPanel(){
@@ -240,8 +259,8 @@ public class ProductDialog extends JDialog {
         saveButton.setMaximumSize(saveButton.getPreferredSize());
 
         saveButton.addActionListener(e ->{
-            if (!isAdjust) addProduct();
-            else saveProductInfor();
+            if (!isAdjust) addEmployee();
+            else saveEmployeeInfor();
         });
 
         buttonPanel.add(saveButton);
@@ -249,23 +268,20 @@ public class ProductDialog extends JDialog {
     }
 
     private ArrayList<String> gatherInput(){
-        ProductType type = (ProductType) typeComboBox.getSelectedItem();
-
-        if (type == null) throw new NullPointerException("type is null");
-
-        String typeCode = type.getTypeCode();
-
         return new ArrayList<>(){{
-            add(nameTextField.getText());
-            add(typeCode);
-            add(quantityTextField.getText());
-            add(desTextArea.getText());
-            add(priceTextField.getText());
+            add(firstNameTextField.getText());
+            add(lastNameTextField.getText());
+            add(usernameTextField.getText());
+            add(passwordTextField.getText());
+            add(addressTextField.getText());
+            add(dateTextField.getText());
+            add(jobTextField.getText());
+            add(salaryTextField.getText());
         }};
     }
 
     private boolean checkValid(ArrayList<String> input){
-        Pair<Boolean, String> res = productBUS.checkValidInput(input);
+        Pair<Boolean, String> res = employeeBUS.checkValidInput(input);
 
         if (!res.getFirst()){
             AppManager.showPopUpMessage(res.getLast());
@@ -275,12 +291,18 @@ public class ProductDialog extends JDialog {
         return true;
     }
 
-    private void addProduct(){
+    private void addEmployee(){
         ArrayList<String> input = gatherInput();
 
         if (!checkValid(input)) return;
 
-        Pair<Boolean, String> res = productBUS.addProductToDatabase(input);
+        Pair<Boolean, String> res = new Pair<>(false, "Something wrong");
+
+        try{
+            res = employeeBUS.addEmployeeToDatabase(input);
+        }
+        catch (ParseException ignore){}
+
         AppManager.showPopUpMessage(res.getLast());
 
         if (res.getFirst()){
@@ -288,12 +310,18 @@ public class ProductDialog extends JDialog {
         }
     }
 
-    private void saveProductInfor(){
+    private void saveEmployeeInfor(){
         ArrayList<String> input = gatherInput();
 
         if (!checkValid(input)) return;
 
-        Pair<Boolean, String> res = productBUS.adjustProduct(input, currentProduct.getProductCode());
+        Pair<Boolean, String> res = new Pair<>(false, "Something wrong");
+
+        try{
+            res = employeeBUS.adjustEmployee(input, currentEmployee.getCode());
+        }
+        catch (ParseException ignore){}
+
         AppManager.showPopUpMessage(res.getLast());
 
         if (res.getFirst()){

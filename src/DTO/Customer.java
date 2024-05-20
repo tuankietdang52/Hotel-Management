@@ -6,16 +6,16 @@ public class Customer extends User {
 
     }
 
-    public Customer(String firstName,
+    public Customer(String code,
+                    String firstName,
                     String lastName,
                     String username,
                     String password,
-                    int phone,
+                    String phone,
                     String address,
-                    EGender gender,
                     java.sql.Date birthday){
 
-        super(firstName, lastName, username, password, phone, address, gender, birthday);
+        super(code, firstName, lastName, username, password, phone, address, birthday);
         setPermission(EPermission.CUSTOMER);
     }
 }

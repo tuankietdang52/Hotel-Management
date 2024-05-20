@@ -6,10 +6,7 @@ import DTO.Product;
 import DTO.Sale;
 import DTO.SaleDetail;
 
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class SaleBUS {
     private final SaleDAO saleDAO;
@@ -29,7 +26,7 @@ public class SaleBUS {
         ArrayList<SaleDetail> listSaleDetail = saleDAO.getSaleDetailsByCode(saleCode);
 
         for (SaleDetail saleDetail : listSaleDetail){
-            Product product = productDAO.findProductbyCode(saleDetail.getProductCode());
+            Product product = productDAO.findProductByCode(saleDetail.getProductCode());
             listProduct.add(product);
         }
 

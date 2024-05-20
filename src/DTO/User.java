@@ -9,31 +9,30 @@ public class User {
     private String lastName;
     private String username;
     private String password;
-    private int phone;
+    private String phone;
     private String address;
     private EPermission permission;
-    private EGender gender;
     private java.sql.Date birthday;
 
     public User(){
 
     }
 
-    public User(String firstName,
+    public User(String code,
+                String firstName,
                 String lastName,
                 String username,
                 String password,
-                int phone,
+                String phone,
                 String address,
-                EGender gender,
                 java.sql.Date birthday){
+        this.code = code;
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.password = password;
         this.phone = phone;
         this.address = address;
-        this.gender = gender;
         this.birthday = birthday;
     }
 
@@ -53,7 +52,7 @@ public class User {
         return permission;
     }
 
-    public int getPhone() {
+    public String getPhone() {
         return phone;
     }
 
@@ -71,10 +70,6 @@ public class User {
 
     public String getUsername() {
         return username;
-    }
-
-    public EGender getGender() {
-        return gender;
     }
 
     public java.sql.Date getBirthday() {
@@ -105,12 +100,8 @@ public class User {
         this.permission = permission;
     }
 
-    public void setPhone(int phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public void setGender(EGender gender) {
-        this.gender = gender;
     }
 
     public void setUsername(String username) {

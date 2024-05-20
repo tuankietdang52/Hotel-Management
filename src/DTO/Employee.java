@@ -3,19 +3,24 @@ import Enum.*;
 
 public class Employee extends User {
     private double salary;
+    private String job;
 
-    public Employee(String firstName,
+    public Employee(String code,
+                    String firstName,
                     String lastName,
                     String username,
                     String password,
-                    int phone,
+                    String phone,
                     String address,
-                    EGender gender,
                     java.sql.Date birthday,
+                    String job,
                     double salary) {
 
-        super(firstName, lastName, username, password, phone, address, gender, birthday);
+        super(code, firstName, lastName, username, password, phone, address, birthday);
         setPermission(EPermission.EMPLOYEE);
+
+        this.salary = salary;
+        this.job = job;
     }
 
     public void setSalary(double salary) {
@@ -24,5 +29,13 @@ public class Employee extends User {
 
     public double getSalary() {
         return salary;
+    }
+
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public String getJob() {
+        return job;
     }
 }

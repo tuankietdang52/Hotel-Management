@@ -4,13 +4,12 @@ import DAO.ProductDAO;
 import DAO.ProductTypeDAO;
 import DTO.Product;
 import DTO.ProductType;
-import GUI.ProductDialog;
 import Utilities.AppManager;
 import Utilities.Pair;
 
-import javax.swing.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ProductBUS {
     private final ProductDAO productDao;
@@ -23,6 +22,24 @@ public class ProductBUS {
 
     public ArrayList<Product> getListProduct(){
         return productDao.getProductData();
+    }
+
+    public ArrayList<Product> filtProductByTypeCode(String typeCode){
+        ArrayList<Product> products = productDao.getProductData();
+        ArrayList<Product> filtProduct = new ArrayList<>();
+
+        for (Product product : products){
+            if (!Objects.equals(product.getTypeCode(), typeCode)) continue;
+
+            filtProduct.add(product);
+        }
+
+        return filtProduct;
+    }
+
+    public ArrayList<ArrayList<String>> filtProductTableByType(ProductType productType){
+        ArrayList<Product> products = filtProductByTypeCode(productType.getTypeCode());
+        return getProductDataTable(products);
     }
 
     public ArrayList<ProductType> getListProductType(){
@@ -58,7 +75,7 @@ public class ProductBUS {
         return res ? new Pair<>(true, "Xóa thành công") : new Pair<>(false, "Xóa thất bại");
     }
 
-    public ArrayList<ArrayList<String>> getProductToDataTable(){
+    public ArrayList<ArrayList<String>> getProductDataTable(){
         ArrayList<Product> products = productDao.getProductData();
         ArrayList<ArrayList<String>> result = new ArrayList<>();
 
@@ -77,8 +94,26 @@ public class ProductBUS {
         return result;
     }
 
+    public ArrayList<ArrayList<String>> getProductDataTable(ArrayList<Product> products){
+        ArrayList<ArrayList<String>> result = new ArrayList<>();
+
+        DecimalFormat priceFormat = new DecimalFormat("#,###");
+
+        for (Product product : products){
+            result.add(new ArrayList<>(){{
+                add(product.getProductCode());
+                add(product.getProductName());
+                add(getProductTypeByCode(product.getTypeCode()).getTypeName());
+                add(priceFormat.format((int)product.getPrice()) + "đ");
+                add(Integer.toString(product.getQuantity()));
+            }});
+        }
+
+        return result;
+    }
+
     public Product getProductByCode(String code){
-        return productDao.findProductbyCode(code);
+        return productDao.findProductByCode(code);
     }
 
     public ProductType getProductTypeByCode(String code){
@@ -87,7 +122,7 @@ public class ProductBUS {
 
     public Pair<Boolean, String> checkValidInput(ArrayList<String> dataInput){
         if (dataInput.getFirst().isEmpty()){
-            return new Pair<>(false, "Ma san pham khong duoc de trong");
+            return new Pair<>(false, "Ten san pham khong duoc de trong");
         }
         else if (!isValidNumberTextField(dataInput.get(2))){
             return new Pair<>(false, "So luong sai dinh dang hoac de trong");
