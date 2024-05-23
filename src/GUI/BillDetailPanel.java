@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 public class BillDetailPanel extends ViewWithTable {
     //region GUI Field
 
-    private BillDialog billDialog;
     private JPanel contentPanel;
     private JPanel inforPanel;
     private JPanel optionPanel;
@@ -40,8 +39,6 @@ public class BillDetailPanel extends ViewWithTable {
 
     private final BillBUS billBUS;
     private Bill currentBill;
-    private boolean isSaved = false;
-    private boolean isAdjust = false;
 
     public BillDetailPanel(){
         billBUS = new BillBUS();
@@ -80,7 +77,6 @@ public class BillDetailPanel extends ViewWithTable {
 
     public void setCurrentBill(Bill bill){
         currentBill = bill;
-        isAdjust = bill != null;
 
         if (bill == null) resetTableModel();
         else setTableData(billBUS.getDetailDataTable(currentBill));
@@ -322,10 +318,7 @@ public class BillDetailPanel extends ViewWithTable {
 
     private void saveBill(){
         Bill bill = getBillModel();
-        Pair<Boolean, String> res;
-
-        if (!isAdjust) res = billBUS.addBillToDatabase(bill);
-        else res = billBUS.adjustBill(bill);
+        Pair<Boolean, String> res = billBUS.adjustBill(bill);
 
         if (res.getFirst()){
             AppManager.showPopUpMessage(res.getLast());
