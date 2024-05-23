@@ -22,16 +22,21 @@ public abstract class TableModelWithFilter extends AbstractTableModel {
     }
 
     public void setData(ArrayList<ArrayList<String>> dataProduct){
-        if (dataProduct == null){
-            data = new ArrayList<>();
+        if (dataProduct == null || dataProduct.isEmpty()){
+            clearData();
             return;
         }
 
-        if (data != null) data.clear();
         data = dataProduct;
-
-        System.out.println(data.size());
+//        System.out.println(data.size());
         fireTableDataChanged();
+    }
+
+    private void clearData(){
+        for (int i = getRowCount() - 1; i >= 0; i--){
+            data.remove(i);
+            fireTableRowsDeleted(i, i);
+        }
     }
 
     public TableRowSorter<TableModel> createTableFilter(JTextField searchArea){
@@ -82,7 +87,7 @@ public abstract class TableModelWithFilter extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return data.size();
+        return data != null ? data.size() : -1;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package GUI;
+package GUI.Dialog;
 
 import DTO.Product;
 import Utilities.RoundBorder;

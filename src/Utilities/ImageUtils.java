@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,6 +25,18 @@ public class ImageUtils {
             if (stream == null) throw new NullPointerException();
 
             BufferedImage resource = ImageIO.read(stream);
+            image = new ImageIcon(resource);
+        } catch (NullPointerException | IOException ex) {
+            System.out.println("Cannot load file\n" + ex.getMessage());
+        }
+
+        return image;
+    }
+
+    public static ImageIcon loadImageAbsolute(String absolutePath){
+        ImageIcon image = null;
+        try {
+            BufferedImage resource = ImageIO.read(new File(absolutePath));
             image = new ImageIcon(resource);
         } catch (NullPointerException | IOException ex) {
             System.out.println("Cannot load file\n" + ex.getMessage());

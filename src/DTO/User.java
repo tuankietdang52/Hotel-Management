@@ -45,7 +45,7 @@ public class User {
     }
 
     public String getFullName(){
-        return firstName + lastName;
+        return String.format("%s %s", firstName, lastName);
     }
 
     public EPermission getPermission() {

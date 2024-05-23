@@ -3,6 +3,7 @@ package GUI;
 import BUS.CustomerBUS;
 import DTO.Customer;
 import DTO.CustomerTableModel;
+import GUI.Dialog.CustomerDialog;
 import Utilities.*;
 
 import javax.swing.*;
@@ -21,12 +22,16 @@ public class CustomerGUI extends ViewWithTable {
 
     //endregion
 
-    private final CustomerBUS customerBUS;
+    private CustomerBUS customerBUS;
 
     public CustomerGUI(){
-        super(new CustomerTableModel(new CustomerBUS().getCustomerDataTable()));
+        super(new CustomerTableModel(), new CustomerBUS());
+        setupView();
+    }
 
-        customerBUS = new CustomerBUS();
+    @Override
+    public void setupView() {
+        customerBUS = (CustomerBUS) viewBUS;
 
         setupPanel();
         setupOptionPanel();
@@ -35,6 +40,11 @@ public class CustomerGUI extends ViewWithTable {
 
         contentPanel.add(searchPanel);
         contentPanel.add(scrollTable);
+    }
+
+    @Override
+    public void resetView() {
+        resetTableData();
     }
 
     private void setupPanel(){
@@ -58,7 +68,7 @@ public class CustomerGUI extends ViewWithTable {
 
         RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
                 e -> {
-                    CustomerDialog addDialog = new CustomerDialog("Thêm khách hàng");
+                    CustomerDialog addDialog = new CustomerDialog();
                     addDialog.setVisible(true);
                     addEventDialog(addDialog);
                 });
@@ -83,7 +93,7 @@ public class CustomerGUI extends ViewWithTable {
         String customerCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
         Customer cur = customerBUS.getCustomerByCode(customerCode);
 
-        CustomerDialog adjustDialog = new CustomerDialog("Sửa thông tin khách hàng", cur);
+        CustomerDialog adjustDialog = new CustomerDialog(cur);
         adjustDialog.setVisible(true);
         addEventDialog(adjustDialog);
     }
@@ -99,18 +109,19 @@ public class CustomerGUI extends ViewWithTable {
         }
 
         String customerCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        Customer customer = customerBUS.getCustomerByCode(customerCode);
 
-        Pair<Boolean, String> res = customerBUS.removeCustomer(customerCode);
+        Pair<Boolean, String> res = customerBUS.removeCustomer(customer);
         AppManager.showPopUpMessage(res.getLast());
 
-        if (res.getFirst()) setTableData(customerBUS.getCustomerDataTable());
+        if (res.getFirst()) setTableData(customerBUS.getDataTable());
     }
 
     private void addEventDialog(JDialog dialog){
         dialog.addWindowListener(new WindowCloseListener() {
             @Override
             public void windowClosed(WindowEvent e) {
-                setTableData(customerBUS.getCustomerDataTable());
+                setTableData(customerBUS.getDataTable());
             }
         });
     }

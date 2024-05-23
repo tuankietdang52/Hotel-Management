@@ -1,9 +1,9 @@
 package GUI;
 
-import BUS.EmployeeBUS;
-import DTO.Employee;
-import DTO.EmployeeTableModel;
-import GUI.Dialog.EmployeeDialog;
+import BUS.BillBUS;
+import DTO.Bill;
+import DTO.BillTableModel;
+import GUI.Dialog.BillDialog;
 import Utilities.*;
 
 import javax.swing.*;
@@ -13,27 +13,33 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.util.function.Consumer;
 
-public class EmployeeGUI extends ViewWithTable{
+public class BillPanel extends ViewWithTable {
     //region GUI Field
 
     private JPanel contentPanel;
     private JPanel optionPanel;
+    private JButton addButton;
+    private JButton adjustButton;
+    private BillDialog billDialog;
 
     //endregion
 
-    private EmployeeBUS employeeBUS;
+    private BillBUS billBUS;
+    private Bill current;
+    private boolean forceChange = false;
 
-    public EmployeeGUI(){
-        super(new EmployeeTableModel(), new EmployeeBUS());
+    public BillPanel(){
+        super(new BillTableModel(), new BillBUS());
         setupView();
     }
 
     @Override
     public void setupView() {
-        employeeBUS = (EmployeeBUS) viewBUS;
-
+        billBUS = (BillBUS) viewBUS;
         setupPanel();
+
         setupOptionPanel();
         setupTable();
         setupSearchPanel();
@@ -66,64 +72,58 @@ public class EmployeeGUI extends ViewWithTable{
         container.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
         container.setBackground(new Color(255, 238, 225));
 
-        RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
-                e -> {
-                    EmployeeDialog addDialog = new EmployeeDialog();
-                    addDialog.setVisible(true);
-                    addEventDialog(addDialog);
-                });
-        RoundButton adjustButton = setupOptionButton("adjust.png", new Color(255, 127, 39),
-                e -> showAdjustDialog());
+        addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
+                e -> addBill());
+        adjustButton = setupOptionButton("adjust.png", new Color(255, 127, 39), null);
         RoundButton removeButton = setupOptionButton("delete.png", new Color(255, 0, 0),
-                e -> deleteEmployee());
+                e -> deleteBill());
 
         container.add(addButton);
         container.add(adjustButton);
         container.add(removeButton);
 
+        addButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        adjustButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        removeButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
         optionPanel.add(container);
         contentPanel.add(optionPanel);
     }
 
-    private void showAdjustDialog(){
-        if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui lòng chọn 1 nhân viên");
-            return;
-        }
-        String employeeCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
-        Employee cur = employeeBUS.getEmployeeByCode(employeeCode);
-
-        EmployeeDialog adjustDialog = new EmployeeDialog(cur);
-        adjustDialog.setVisible(true);
-        addEventDialog(adjustDialog);
-    }
-
-    private void deleteEmployee(){
-        if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui lòng chọn 1 nhân viên");
-            return;
-        }
-
-        if (!AppManager.showConfirmMessage("Bạn có chắc muốn xóa nhân viên này không ?")){
-            return;
-        }
-
-        String employeeCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
-        Employee employee = employeeBUS.getEmployeeByCode(employeeCode);
-
-        Pair<Boolean, String> res = employeeBUS.removeEmployee(employee);
-        AppManager.showPopUpMessage(res.getLast());
-
-        if (res.getFirst()) setTableData(employeeBUS.getDataTable());
-    }
-
-    private void addEventDialog(JDialog dialog){
-        dialog.addWindowListener(new WindowCloseListener() {
+    private void addBill(){
+        billDialog = new BillDialog();
+        billDialog.setVisible(true);
+        billDialog.addWindowListener(new WindowCloseListener() {
             @Override
             public void windowClosed(WindowEvent e) {
-                setTableData(employeeBUS.getDataTable());
+                addEvent();
             }
         });
+    }
+
+    private void addEvent(){
+        setCurrentBill(billDialog.getBillAdded());
+        forceChange = true;
+        adjustButton.doClick();
+    }
+
+    private void deleteBill(){
+        if (dataTable.getSelectedRow() == -1){
+            AppManager.showPopUpMessage("Vui lòng chọn 1 hóa đơn");
+            return;
+        }
+
+        if (!AppManager.showConfirmMessage("Bạn có chắc muốn xóa hóa đơn này không ?")){
+            return;
+        }
+
+        String billCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        Bill bill = billBUS.getBillByCode(billCode);
+
+        Pair<Boolean, String> res = billBUS.removeBill(bill);
+        AppManager.showPopUpMessage(res.getLast());
+
+        if (res.getFirst()) setTableData(billBUS.getDataTable());
     }
 
     private RoundButton setupOptionButton(String imageName, Color color, ActionListener callback){
@@ -132,27 +132,29 @@ public class EmployeeGUI extends ViewWithTable{
         RoundButton button = new RoundButton(20, image);
 
         button.setPreferredSize(new Dimension(110, 60));
+        button.setMaximumSize(button.getPreferredSize());
+        button.setMinimumSize(button.getPreferredSize());
+
         button.setBackground(color);
         button.setBorder(new EmptyBorder(0, 0, 0, 100));
 
-        button.addActionListener(callback);
+        if (callback != null) button.addActionListener(callback);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         return button;
     }
 
     @Override
-    protected void setupTableComponent() {
+    protected void setupTableComponent(){
         TableColumnModel columnModel = dataTable.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(100);
-        columnModel.getColumn(1).setPreferredWidth(150);
-        columnModel.getColumn(2).setPreferredWidth(100);
-        columnModel.getColumn(3).setPreferredWidth(100);
+        columnModel.getColumn(0).setPreferredWidth(200);
+        columnModel.getColumn(1).setPreferredWidth(200);
+        columnModel.getColumn(2).setPreferredWidth(200);
+        columnModel.getColumn(3).setPreferredWidth(200);
         columnModel.getColumn(4).setPreferredWidth(200);
-        columnModel.getColumn(5).setPreferredWidth(100);
-        columnModel.getColumn(6).setPreferredWidth(150);
-        columnModel.getColumn(7).setPreferredWidth(100);
 
+        columnModel.removeColumn(columnModel.getColumn(5));
+        columnModel.removeColumn(columnModel.getColumn(5));
 
         dataTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         dataTable.setRowHeight(50);
@@ -167,6 +169,36 @@ public class EmployeeGUI extends ViewWithTable{
         dataTable.setSelectionBackground(new Color(255, 0, 0, 100));
         dataTable.getTableHeader().setResizingAllowed(false);
         dataTable.getTableHeader().setReorderingAllowed(false);
+    }
+
+    public void setChangeContentEvent(Consumer<String> callback){
+        adjustButton.addActionListener(e -> {
+            if (!forceChange){
+                if (dataTable.getSelectedRow() == -1) {
+                    AppManager.showPopUpMessage("Vui lòng chọn 1 hóa đơn");
+                    return;
+                }
+                else setCurrentBill();
+            }
+            callback.accept("BillDetail");
+            forceChange = false;
+        });
+    }
+
+    public void setCurrentBill(){
+        try{
+            String billCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+            current = billBUS.getBillByCode(billCode);
+        }
+        catch (Exception ignore){}
+    }
+
+    public void setCurrentBill(Bill bill){
+        current = bill;
+    }
+
+    public Bill getCurrentBill(){
+        return current;
     }
 
     @Override

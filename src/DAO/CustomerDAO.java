@@ -9,12 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class CustomerDAO extends BaseDAO{
+public class CustomerDAO extends BaseDAO<Customer>{
     public CustomerDAO(){
 
     }
 
-    private Customer getModel(ResultSet rs) throws SQLException {
+    @Override
+    protected Customer getModel(ResultSet rs) throws SQLException {
         String customerCode = rs.getString("MAKH");
         String customerFirstName = rs.getString("Ho");
         String customerLastName = rs.getString("TEN");
@@ -133,9 +134,9 @@ public class CustomerDAO extends BaseDAO{
 
         return true;
     }
-    public boolean deleteCustomer(String customerCode){
+    public boolean deleteCustomer(Customer customer){
         String query = String.format("DELETE FROM KHACHHANG WHERE MAKH = '%s'",
-                customerCode);
+                customer.getCode());
 
         Connection cnt = null;
         PreparedStatement stmt = null;

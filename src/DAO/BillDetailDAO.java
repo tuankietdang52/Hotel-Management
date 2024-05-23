@@ -1,6 +1,6 @@
 package DAO;
 
-import DTO.Product;
+import DTO.BillDetail;
 import SQL.SqlConnect;
 
 import java.sql.Connection;
@@ -9,27 +9,47 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class ProductDAO extends BaseDAO<Product>{
-
-    public ProductDAO(){
-
-    }
-
+public class BillDetailDAO extends BaseDAO<BillDetail> {
     @Override
-    protected Product getModel(ResultSet rs) throws SQLException{
+    protected BillDetail getModel(ResultSet rs) throws SQLException {
+        String billCode = rs.getString("MAHOADON");
         String productCode = rs.getString("MASANPHAM");
-        String productName = rs.getString("TENSANPHAM");
-        int quantity = rs.getInt("SOLUONG");
-        String typeCode = rs.getString("MALOAI");
-        String description = rs.getString("MOTA");
-        float price = rs.getFloat("DONGIA");
-        String imagePath = rs.getString("HINH");
+        int amount = rs.getInt("SOLUONG");
 
-        return new Product(productCode, productName, typeCode, quantity, description, imagePath, price);
+        return new BillDetail(billCode, productCode, amount);
     }
 
-    public Product findProductByCode(String code){
-        String query = String.format("SELECT * FROM SANPHAM WHERE MASANPHAM = '%s'", code);
+    public ArrayList<BillDetail> findBillDetailByBillCode(String code){
+        String query = String.format("SELECT * FROM CHITIETHOADON WHERE MAHOADON = '%s'", code);
+
+        ArrayList<BillDetail> listBillDetail = new ArrayList<>();
+
+        Connection cnt = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            cnt = SqlConnect.getConnection();
+            stmt = cnt.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            while (rs.next()){
+                listBillDetail.add(getModel(rs));
+            }
+        }
+        catch (SQLException | ClassNotFoundException ex){
+            System.out.println("Khong the ket noi" + ex);
+            return listBillDetail;
+        }
+        finally {
+            closingConnection(cnt, stmt, rs);
+        }
+
+        return listBillDetail;
+    }
+
+    public BillDetail getBillDetailByBillAndProductCode(String billCode, String productCode){
+        String query = String.format("SELECT * FROM CHITIETHOADON WHERE MAHOADON = '%s' AND MASANPHAM = '%s'", billCode, productCode);
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -53,9 +73,9 @@ public class ProductDAO extends BaseDAO<Product>{
         }
     }
 
-    public ArrayList<Product> getProductData() {
-        ArrayList<Product> listProduct = new ArrayList<>();
-        String query = "SELECT * FROM SANPHAM";
+    public ArrayList<BillDetail> getBillDetailData() {
+        ArrayList<BillDetail> listBillDetail = new ArrayList<>();
+        String query = "SELECT * FROM CHITIETHOADON";
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -67,24 +87,23 @@ public class ProductDAO extends BaseDAO<Product>{
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                Product product = getModel(rs);
-                listProduct.add(product);
+                BillDetail billDetail = getModel(rs);
+                listBillDetail.add(billDetail);
             }
         }
         catch (SQLException | ClassNotFoundException ex){
-            System.out.println("Khong the ket noi");
+            System.out.println("Khong the ket noi" + ex);
         }
         finally {
             closingConnection(cnt, stmt, rs);
         }
 
-        return listProduct;
+        return listBillDetail;
     }
 
-    public boolean addProduct(Product product){
-        String query = String.format("INSERT INTO SANPHAM VALUES ('%s', '%s', '%s', %s, '%s', %s, '%s')",
-                product.getProductCode(), product.getProductName(), product.getTypeCode(),
-                product.getQuantity(), product.getDescription(), product.getPrice(), product.getImage());
+    public boolean addBillDetail(BillDetail billDetail){
+        String query = String.format("INSERT INTO CHITIETHOADON VALUES ('%s', '%s', %s)",
+                billDetail.getBillCode(), billDetail.getProductCode(), billDetail.getQuantity());
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -92,6 +111,7 @@ public class ProductDAO extends BaseDAO<Product>{
         try{
             cnt = SqlConnect.getConnection();
             stmt = cnt.prepareStatement(query);
+
             stmt.executeUpdate();
         }
         catch (SQLException | ClassNotFoundException ex){
@@ -105,11 +125,10 @@ public class ProductDAO extends BaseDAO<Product>{
         return true;
     }
 
-    public boolean adjustProduct(Product product){
-        String query = String.format("UPDATE SANPHAM SET TENSANPHAM = '%s', MALOAI = '%s', SOLUONG = %s, MOTA = '%s', DONGIA = %s, HINH = '%s' WHERE MASANPHAM = '%s'",
-                product.getProductName(), product.getTypeCode(), product.getQuantity(),
-                product.getDescription(), product.getPrice(),
-                product.getImage(), product.getProductCode());
+    public boolean adjustBillDetail(BillDetail billDetail){
+        String query = String.format("UPDATE CHITIETHOADON SET SOLUONG = %s WHERE MAHOADON = '%s' AND MASANPHAM = '%s'",
+                billDetail.getQuantity(),
+                billDetail.getBillCode(), billDetail.getProductCode());
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -117,6 +136,7 @@ public class ProductDAO extends BaseDAO<Product>{
         try{
             cnt = SqlConnect.getConnection();
             stmt = cnt.prepareStatement(query);
+
             stmt.executeUpdate();
         }
         catch (SQLException | ClassNotFoundException ex){
@@ -129,9 +149,10 @@ public class ProductDAO extends BaseDAO<Product>{
 
         return true;
     }
-    public boolean deleteProduct(Product product){
-        String query = String.format("DELETE FROM SANPHAM WHERE MASANPHAM = '%s'",
-                product.getProductCode());
+
+    public boolean deleteBillDetail(BillDetail billDetail){
+        String query = String.format("DELETE FROM CHITIETHOADON WHERE MAHOADON = '%s' AND MASANPHAM = '%s'",
+                billDetail.getBillCode(), billDetail.getProductCode());
 
         Connection cnt = null;
         PreparedStatement stmt = null;
