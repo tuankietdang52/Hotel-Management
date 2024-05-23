@@ -1,16 +1,12 @@
 package GUI;
 
+import Utilities.AppManager;
 import Utilities.ImageUtils;
 import Utilities.SelectListCellRenderer;
 import com.formdev.flatlaf.FlatDarculaLaf;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.concurrent.Callable;
 
 
 public class MainView {
@@ -20,6 +16,17 @@ public class MainView {
     private JPanel contentPanel;
     private JPanel navigatePanel;
     private JList<String> navigateList;
+
+    //endregion
+
+    //region Content
+
+    private Home homeGUI;
+    private ProductGUI productGUI;
+    private EmployeeGUI employeeGUI;
+    private CustomerGUI customerGUI;
+    private SupplierGUI supplierGUI;
+    private BillGUI billGUI;
 
     //endregion
 
@@ -37,14 +44,26 @@ public class MainView {
         contentPanel.setPreferredSize(new Dimension(1000, 900));
         contentPanel.setLayout(new CardLayout());
 
+        initContent();
         setupContent();
     }
 
+    private void initContent(){
+        homeGUI = new Home();
+        productGUI = new ProductGUI();
+        employeeGUI = new EmployeeGUI();
+        customerGUI = new CustomerGUI();
+        supplierGUI = new SupplierGUI();
+        billGUI = new BillGUI();
+    }
+
     private void setupContent(){
-        contentPanel.add(new Home().getPanel(), "Home");
-        contentPanel.add(new ProductGUI().getPanel(), "Sản phẩm");
-        contentPanel.add(new EmployeeGUI().getPanel(), "Nhân viên");
-        contentPanel.add(new CustomerGUI().getPanel(), "Khách hàng");
+        contentPanel.add(homeGUI.getPanel(), "Home");
+        contentPanel.add(productGUI.getPanel(), "Sản phẩm");
+        contentPanel.add(employeeGUI.getPanel(), "Nhân viên");
+        contentPanel.add(customerGUI.getPanel(), "Khách hàng");
+        contentPanel.add(supplierGUI.getPanel(), "Nhà cung cấp");
+        contentPanel.add(billGUI.getPanel(), "Hóa đơn");
     }
 
     private void setupNavigatePanel(){
@@ -157,7 +176,20 @@ public class MainView {
         changeContent("Home");
     }
 
+    private void resetCurrentContent(String name){
+        switch (name){
+            case "Home" -> homeGUI.resetView();
+            case "Sản phẩm" -> productGUI.resetView();
+            case "Nhân viên" -> employeeGUI.resetView();
+            case "Khách hàng" -> customerGUI.resetView();
+            case "Nhà cung cấp" -> supplierGUI.resetView();
+            case "Hóa đơn" -> billGUI.resetView();
+            default -> AppManager.showPopUpMessage("Where is the current content");
+        }
+    }
+
     public void changeContent(String formName){
+        resetCurrentContent(formName);
         CardLayout layout = (CardLayout) contentPanel.getLayout();
         layout.show(contentPanel, formName);
     }

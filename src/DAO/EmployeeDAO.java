@@ -9,12 +9,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class EmployeeDAO extends BaseDAO{
-     public EmployeeDAO(){
+public class EmployeeDAO extends BaseDAO<Employee>{
+    public EmployeeDAO(){
 
-     }
+    }
 
-    private Employee getModel(ResultSet rs) throws SQLException {
+    @Override
+    protected Employee getModel(ResultSet rs) throws SQLException {
         String employeeCode = rs.getString("MANV");
         String employeeFirstName = rs.getString("Ho");
         String employeeLastName = rs.getString("TEN");
@@ -135,9 +136,9 @@ public class EmployeeDAO extends BaseDAO{
 
         return true;
     }
-    public boolean deleteEmployee(String employeeCode){
+    public boolean deleteEmployee(Employee employee){
         String query = String.format("DELETE FROM NHANVIEN WHERE MANV = '%s'",
-                employeeCode);
+                employee.getCode());
 
         Connection cnt = null;
         PreparedStatement stmt = null;

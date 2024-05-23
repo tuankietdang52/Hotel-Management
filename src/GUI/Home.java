@@ -1,7 +1,6 @@
 package GUI;
 
 import BUS.ProductBUS;
-import BUS.SaleBUS;
 import Interface.IView;
 
 import javax.swing.*;
@@ -19,18 +18,27 @@ public class Home implements IView{
     //region BUS Field
 
     private final ProductBUS productBUS;
-    private final SaleBUS saleBUS;
 
     //endregion
 
     public Home(){
         productBUS = new ProductBUS();
-        saleBUS = new SaleBUS();
+        setupView();
+    }
+
+    @Override
+    public void setupView() {
+        if (homePanel == null) throw new NullPointerException("Home Panel is null");
 
         homePanel.setBackground(new Color(255, 238, 225));
         homePanel.setPreferredSize(new Dimension(1000, 800));
         homePanel.setMaximumSize(homePanel.getPreferredSize());
         homePanel.setLayout(new GridBagLayout());
+    }
+
+    @Override
+    public void resetView() {
+
     }
 
     @Override

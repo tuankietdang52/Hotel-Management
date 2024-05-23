@@ -4,6 +4,7 @@ import BUS.ProductBUS;
 import DTO.Product;
 import DTO.ProductTableModel;
 import DTO.ProductType;
+import GUI.Dialog.ProductDialog;
 import Utilities.*;
 
 import javax.swing.*;
@@ -23,12 +24,16 @@ public class ProductGUI extends ViewWithTable {
 
     //endregion
 
-    private final ProductBUS productBUS;
+    private ProductBUS productBUS;
 
     public ProductGUI(){
-        super(new ProductTableModel(new ProductBUS().getProductDataTable()));
+        super(new ProductTableModel(), new ProductBUS());
+        setupView();
+    }
 
-        productBUS = new ProductBUS();
+    @Override
+    public void setupView() {
+        productBUS = (ProductBUS) viewBUS;
 
         setupPanel();
 
@@ -41,6 +46,11 @@ public class ProductGUI extends ViewWithTable {
 
         contentPanel.add(searchPanel);
         contentPanel.add(scrollTable);
+    }
+
+    @Override
+    public void resetView() {
+        resetTableData();
     }
 
     private void setupPanel(){
@@ -66,7 +76,7 @@ public class ProductGUI extends ViewWithTable {
 
         RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
                 e -> {
-                    ProductDialog addDialog = new ProductDialog("Thêm Sản Phẩm");
+                    ProductDialog addDialog = new ProductDialog();
                     addDialog.setVisible(true);
                     addEventDialog(addDialog);
                 });
@@ -89,40 +99,41 @@ public class ProductGUI extends ViewWithTable {
 
     private void showAdjustDialog(){
         if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
+            AppManager.showPopUpMessage("Vui lòng chọn 1 sản phẩm trước");
             return;
         }
         String productCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
         Product cur = productBUS.getProductByCode(productCode);
 
-        ProductDialog adjustDialog = new ProductDialog("Sửa sản phẩm", cur);
+        ProductDialog adjustDialog = new ProductDialog(cur);
         adjustDialog.setVisible(true);
         addEventDialog(adjustDialog);
     }
 
     private void deleteProduct(){
         if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
+            AppManager.showPopUpMessage("Vui lòng chọn 1 sản phẩm");
             return;
         }
 
-        if (!AppManager.showConfirmMessage("Ban co chac muon xoa san pham nay khong ?")){
+        if (!AppManager.showConfirmMessage("Bạn có chắc muốn xóa sản phẩm này không ?")){
             return;
         }
 
         String productCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        Product product = productBUS.getProductByCode(productCode);
 
-        Pair<Boolean, String> res = productBUS.removeProduct(productCode);
+        Pair<Boolean, String> res = productBUS.removeProduct(product);
         AppManager.showPopUpMessage(res.getLast());
 
-        if (res.getFirst()) setTableData(productBUS.getProductDataTable());
+        if (res.getFirst()) setTableData(productBUS.getDataTable());
     }
 
     private void addEventDialog(JDialog dialog){
         dialog.addWindowListener(new WindowCloseListener() {
             @Override
             public void windowClosed(WindowEvent e) {
-                setTableData(productBUS.getProductDataTable());
+                setTableData(productBUS.getDataTable());
             }
         });
     }
@@ -185,7 +196,7 @@ public class ProductGUI extends ViewWithTable {
         var type = (ProductType) companyFilter.getModel().getSelectedItem();
 
         if (Objects.equals(type.getTypeCode(), "all")){
-            setTableData(productBUS.getProductDataTable());
+            setTableData(productBUS.getDataTable());
             return;
         }
 

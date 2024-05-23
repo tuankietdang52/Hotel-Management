@@ -10,12 +10,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class ProductTypeDAO extends BaseDAO {
+public class ProductTypeDAO extends BaseDAO<ProductType> {
     public ProductTypeDAO(){
 
     }
 
-    private ProductType getModel(ResultSet rs) throws SQLException{
+    @Override
+    protected ProductType getModel(ResultSet rs) throws SQLException{
         String typeCode = rs.getString("MALOAI");
         String typeName = rs.getString("TENLOAI");
 

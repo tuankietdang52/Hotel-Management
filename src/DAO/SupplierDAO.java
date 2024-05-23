@@ -1,6 +1,6 @@
 package DAO;
 
-import DTO.Product;
+import DTO.Supplier;
 import SQL.SqlConnect;
 
 import java.sql.Connection;
@@ -9,27 +9,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class ProductDAO extends BaseDAO<Product>{
-
-    public ProductDAO(){
-
-    }
-
+public class SupplierDAO extends BaseDAO<Supplier> {
     @Override
-    protected Product getModel(ResultSet rs) throws SQLException{
-        String productCode = rs.getString("MASANPHAM");
-        String productName = rs.getString("TENSANPHAM");
-        int quantity = rs.getInt("SOLUONG");
-        String typeCode = rs.getString("MALOAI");
-        String description = rs.getString("MOTA");
-        float price = rs.getFloat("DONGIA");
-        String imagePath = rs.getString("HINH");
+    protected Supplier getModel(ResultSet rs) throws SQLException {
+        String supplierCode = rs.getString("MANCC");
+        String supplierName = rs.getString("TEN_NCC");
+        String address = rs.getString("DIACHI");
+        String phone = rs.getString("SDT");
 
-        return new Product(productCode, productName, typeCode, quantity, description, imagePath, price);
+        return new Supplier(supplierCode, supplierName, address, phone);
     }
 
-    public Product findProductByCode(String code){
-        String query = String.format("SELECT * FROM SANPHAM WHERE MASANPHAM = '%s'", code);
+    public Supplier findSupplierByCode(String code){
+        String query = String.format("SELECT * FROM NHACUNGCAP WHERE MANCC = '%s'", code);
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -45,7 +37,7 @@ public class ProductDAO extends BaseDAO<Product>{
             return getModel(rs);
         }
         catch (SQLException | ClassNotFoundException ex){
-            System.out.println("Khong the ket noi" + ex);
+            System.out.println("Khong the ket noi");
             return null;
         }
         finally {
@@ -53,9 +45,9 @@ public class ProductDAO extends BaseDAO<Product>{
         }
     }
 
-    public ArrayList<Product> getProductData() {
-        ArrayList<Product> listProduct = new ArrayList<>();
-        String query = "SELECT * FROM SANPHAM";
+    public ArrayList<Supplier> getSupplierData() {
+        ArrayList<Supplier> listSupplier = new ArrayList<>();
+        String query = "SELECT * FROM NHACUNGCAP";
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -67,24 +59,24 @@ public class ProductDAO extends BaseDAO<Product>{
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                Product product = getModel(rs);
-                listProduct.add(product);
+                Supplier supplier = getModel(rs);
+                listSupplier.add(supplier);
             }
         }
         catch (SQLException | ClassNotFoundException ex){
-            System.out.println("Khong the ket noi");
+            System.out.println("Khong the ket noi" + ex);
         }
         finally {
             closingConnection(cnt, stmt, rs);
         }
 
-        return listProduct;
+        return listSupplier;
     }
 
-    public boolean addProduct(Product product){
-        String query = String.format("INSERT INTO SANPHAM VALUES ('%s', '%s', '%s', %s, '%s', %s, '%s')",
-                product.getProductCode(), product.getProductName(), product.getTypeCode(),
-                product.getQuantity(), product.getDescription(), product.getPrice(), product.getImage());
+    public boolean addSupplier(Supplier supplier){
+        String query = String.format("INSERT INTO NHACUNGCAP VALUES ('%s', '%s', '%s', '%s')",
+                supplier.getSupplierCode(), supplier.getSupplierName(), supplier.getAddress(),
+                supplier.getPhone());
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -92,6 +84,7 @@ public class ProductDAO extends BaseDAO<Product>{
         try{
             cnt = SqlConnect.getConnection();
             stmt = cnt.prepareStatement(query);
+
             stmt.executeUpdate();
         }
         catch (SQLException | ClassNotFoundException ex){
@@ -105,11 +98,10 @@ public class ProductDAO extends BaseDAO<Product>{
         return true;
     }
 
-    public boolean adjustProduct(Product product){
-        String query = String.format("UPDATE SANPHAM SET TENSANPHAM = '%s', MALOAI = '%s', SOLUONG = %s, MOTA = '%s', DONGIA = %s, HINH = '%s' WHERE MASANPHAM = '%s'",
-                product.getProductName(), product.getTypeCode(), product.getQuantity(),
-                product.getDescription(), product.getPrice(),
-                product.getImage(), product.getProductCode());
+    public boolean adjustSupplier(Supplier supplier){
+        String query = String.format("UPDATE NHACUNGCAP SET TEN_NCC = '%s', DIACHI = '%s', SDT = '%s' WHERE MANCC = '%s'",
+                supplier.getSupplierName(), supplier.getAddress(), supplier.getPhone(), supplier.getSupplierCode());
+
 
         Connection cnt = null;
         PreparedStatement stmt = null;
@@ -117,6 +109,7 @@ public class ProductDAO extends BaseDAO<Product>{
         try{
             cnt = SqlConnect.getConnection();
             stmt = cnt.prepareStatement(query);
+
             stmt.executeUpdate();
         }
         catch (SQLException | ClassNotFoundException ex){
@@ -129,9 +122,10 @@ public class ProductDAO extends BaseDAO<Product>{
 
         return true;
     }
-    public boolean deleteProduct(Product product){
-        String query = String.format("DELETE FROM SANPHAM WHERE MASANPHAM = '%s'",
-                product.getProductCode());
+
+    public boolean deleteSupplier(Supplier supplier){
+        String query = String.format("DELETE FROM NHACUNGCAP WHERE MANCC = '%s'",
+                supplier.getSupplierCode());
 
         Connection cnt = null;
         PreparedStatement stmt = null;

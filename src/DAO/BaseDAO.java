@@ -1,12 +1,11 @@
 package DAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
-public abstract class BaseDAO {
+public abstract class BaseDAO<T> {
+    protected abstract T getModel(ResultSet rs) throws SQLException;
+
     protected void closingConnection(Connection con, Statement stmt, ResultSet rs){
         try {
             if (con != null) con.close();

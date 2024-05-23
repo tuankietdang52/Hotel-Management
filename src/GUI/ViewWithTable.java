@@ -1,6 +1,6 @@
 package GUI;
 
-import DTO.ProductTableModel;
+import BUS.BaseBUS;
 import Interface.IView;
 import Utilities.*;
 
@@ -15,14 +15,26 @@ public abstract class ViewWithTable implements IView {
     protected JScrollPane scrollTable;
     protected JTable dataTable;
     protected JTextField searchArea;
-    private final TableModelWithFilter tableModel;
+    private TableModelWithFilter tableModel;
+    protected BaseBUS viewBUS;
 
     //endregion
 
-    public ViewWithTable(TableModelWithFilter tableModel){
-        this.tableModel = tableModel;
+    public ViewWithTable(){
+
     }
 
+    public ViewWithTable(TableModelWithFilter tableModel, BaseBUS viewBUS){
+        this.tableModel = tableModel;
+        this.viewBUS = viewBUS;
+
+        this.tableModel.setData(viewBUS.getDataTable());
+    }
+
+    protected void setupTableModel(TableModelWithFilter tableModel, BaseBUS viewBUS){
+        this.tableModel = tableModel;
+        this.viewBUS = viewBUS;
+    }
 
     protected void setupSearchPanel(){
         searchPanel = new JPanel();
@@ -68,8 +80,11 @@ public abstract class ViewWithTable implements IView {
         model.setData(data);
     }
 
-    protected abstract void setupTableComponent();
+    public void resetTableData(){
+        ArrayList<ArrayList<String>> data = viewBUS.getDataTable();
+        TableModelWithFilter model = (TableModelWithFilter) dataTable.getModel();
+        model.setData(data);
+    }
 
-    @Override
-    public abstract JPanel getPanel();
+    protected abstract void setupTableComponent();
 }

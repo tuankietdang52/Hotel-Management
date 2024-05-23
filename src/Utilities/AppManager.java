@@ -17,6 +17,19 @@ public class AppManager {
         return code.toString();
     }
 
+    public static String generateRandomNumberCode(int length){
+        String alphabet = "0123456789";
+        StringBuilder code = new StringBuilder();
+
+        Random rand = new Random();
+
+        for (int i = 0; i < length; i++){
+            code.append(alphabet.charAt(rand.nextInt(alphabet.length())));
+        }
+
+        return code.toString();
+    }
+
     public static boolean showConfirmMessage(String message){
         int choice = JOptionPane.showConfirmDialog(null, message, "", JOptionPane.YES_NO_OPTION);
 

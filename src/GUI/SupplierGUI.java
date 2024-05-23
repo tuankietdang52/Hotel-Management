@@ -1,9 +1,9 @@
 package GUI;
 
-import BUS.EmployeeBUS;
-import DTO.Employee;
-import DTO.EmployeeTableModel;
-import GUI.Dialog.EmployeeDialog;
+import BUS.SupplierBUS;
+import DTO.Supplier;
+import DTO.SupplierTableModel;
+import GUI.Dialog.SupplierDialog;
 import Utilities.*;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 
-public class EmployeeGUI extends ViewWithTable{
+public class SupplierGUI extends ViewWithTable {
     //region GUI Field
 
     private JPanel contentPanel;
@@ -22,19 +22,21 @@ public class EmployeeGUI extends ViewWithTable{
 
     //endregion
 
-    private EmployeeBUS employeeBUS;
+    private SupplierBUS supplierBUS;
 
-    public EmployeeGUI(){
-        super(new EmployeeTableModel(), new EmployeeBUS());
+    public SupplierGUI(){
+        super(new SupplierTableModel(), new SupplierBUS());
         setupView();
     }
 
     @Override
     public void setupView() {
-        employeeBUS = (EmployeeBUS) viewBUS;
+        supplierBUS = (SupplierBUS) viewBUS;
 
         setupPanel();
+
         setupOptionPanel();
+
         setupTable();
         setupSearchPanel();
 
@@ -68,18 +70,22 @@ public class EmployeeGUI extends ViewWithTable{
 
         RoundButton addButton = setupOptionButton("plus.png", new Color(0, 255, 0),
                 e -> {
-                    EmployeeDialog addDialog = new EmployeeDialog();
+                    SupplierDialog addDialog = new SupplierDialog();
                     addDialog.setVisible(true);
                     addEventDialog(addDialog);
                 });
         RoundButton adjustButton = setupOptionButton("adjust.png", new Color(255, 127, 39),
                 e -> showAdjustDialog());
         RoundButton removeButton = setupOptionButton("delete.png", new Color(255, 0, 0),
-                e -> deleteEmployee());
+                e -> deleteSupplier());
 
         container.add(addButton);
         container.add(adjustButton);
         container.add(removeButton);
+
+        addButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        adjustButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        removeButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
         optionPanel.add(container);
         contentPanel.add(optionPanel);
@@ -87,41 +93,41 @@ public class EmployeeGUI extends ViewWithTable{
 
     private void showAdjustDialog(){
         if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui lòng chọn 1 nhân viên");
+            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
             return;
         }
-        String employeeCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
-        Employee cur = employeeBUS.getEmployeeByCode(employeeCode);
+        String supplierCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        Supplier cur = supplierBUS.getSupplierByCode(supplierCode);
 
-        EmployeeDialog adjustDialog = new EmployeeDialog(cur);
+        SupplierDialog adjustDialog = new SupplierDialog(cur);
         adjustDialog.setVisible(true);
         addEventDialog(adjustDialog);
     }
 
-    private void deleteEmployee(){
+    private void deleteSupplier(){
         if (dataTable.getSelectedRow() == -1){
-            AppManager.showPopUpMessage("Vui lòng chọn 1 nhân viên");
+            AppManager.showPopUpMessage("Vui long chon 1 san pham truoc");
             return;
         }
 
-        if (!AppManager.showConfirmMessage("Bạn có chắc muốn xóa nhân viên này không ?")){
+        if (!AppManager.showConfirmMessage("Bạn có chắc muốn xóa sản phẩm này không ?")){
             return;
         }
 
-        String employeeCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
-        Employee employee = employeeBUS.getEmployeeByCode(employeeCode);
+        String supplierCode = (String) dataTable.getModel().getValueAt(dataTable.getSelectedRow(), 0);
+        Supplier supplier = supplierBUS.getSupplierByCode(supplierCode);
 
-        Pair<Boolean, String> res = employeeBUS.removeEmployee(employee);
+        Pair<Boolean, String> res = supplierBUS.removeSupplier(supplier);
         AppManager.showPopUpMessage(res.getLast());
 
-        if (res.getFirst()) setTableData(employeeBUS.getDataTable());
+        if (res.getFirst()) setTableData(supplierBUS.getDataTable());
     }
 
     private void addEventDialog(JDialog dialog){
         dialog.addWindowListener(new WindowCloseListener() {
             @Override
             public void windowClosed(WindowEvent e) {
-                setTableData(employeeBUS.getDataTable());
+                setTableData(supplierBUS.getDataTable());
             }
         });
     }
@@ -132,6 +138,9 @@ public class EmployeeGUI extends ViewWithTable{
         RoundButton button = new RoundButton(20, image);
 
         button.setPreferredSize(new Dimension(110, 60));
+        button.setMaximumSize(button.getPreferredSize());
+        button.setMinimumSize(button.getPreferredSize());
+
         button.setBackground(color);
         button.setBorder(new EmptyBorder(0, 0, 0, 100));
 
@@ -141,18 +150,12 @@ public class EmployeeGUI extends ViewWithTable{
         return button;
     }
 
-    @Override
-    protected void setupTableComponent() {
+    protected void setupTableComponent(){
         TableColumnModel columnModel = dataTable.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(100);
-        columnModel.getColumn(1).setPreferredWidth(150);
-        columnModel.getColumn(2).setPreferredWidth(100);
-        columnModel.getColumn(3).setPreferredWidth(100);
-        columnModel.getColumn(4).setPreferredWidth(200);
-        columnModel.getColumn(5).setPreferredWidth(100);
-        columnModel.getColumn(6).setPreferredWidth(150);
-        columnModel.getColumn(7).setPreferredWidth(100);
-
+        columnModel.getColumn(0).setPreferredWidth(200);
+        columnModel.getColumn(1).setPreferredWidth(300);
+        columnModel.getColumn(2).setPreferredWidth(300);
+        columnModel.getColumn(3).setPreferredWidth(200);
 
         dataTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         dataTable.setRowHeight(50);
